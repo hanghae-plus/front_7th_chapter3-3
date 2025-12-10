@@ -6,10 +6,7 @@ import { fetchUsers } from "@/entities/user"
 import { Tag, fetchTags } from "@/entities/tag"
 import { CreatePostDialog } from "@/features/create-post"
 import { ViewUserInfoDialog } from "@/features/view-user-info"
-import { PostsFilterPanel } from "@/widgets/posts-filter-panel"
-import { PostsTable } from "@/widgets/posts-table"
-import { PostDetailDialog } from "@/widgets/post-detail-dialog"
-import { Pagination } from "@/widgets/pagination"
+import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/widgets"
 
 const PostsManagerPage = () => {
   const navigate = useNavigate()

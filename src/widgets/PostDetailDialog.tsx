@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui"
 import { Post } from "@/entities/post"
 import { Comment, fetchComments } from "@/entities/comment"
-import { CommentList } from "@/widgets/comment-list"
+import { CommentList } from "./CommentList"
 import { highlightText } from "@/shared/lib"
 
 interface PostDetailDialogProps {
