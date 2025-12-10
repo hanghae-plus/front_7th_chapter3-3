@@ -63,3 +63,4 @@ const TableCell = ({ className, ref, ...props }: TableCellProps) => (
 )
 
 export { Table, TableHeader, TableBody, TableRow, TableHead, TableCell }
+
