@@ -1,0 +1,33 @@
+export interface Author {
+  id: number
+  username: string
+  image: string
+}
+
+export interface Reactions {
+  likes: number
+  dislikes: number
+}
+
+export interface Post {
+  id: number
+  title: string
+  body: string
+  userId: number
+  tags: string[]
+  reactions: Reactions
+  author?: Author
+}
+
+export interface PostsResponse {
+  posts: Post[]
+  total: number
+  skip: number
+  limit: number
+}
+
+export interface NewPost {
+  title: string
+  body: string
+  userId: number
+}
