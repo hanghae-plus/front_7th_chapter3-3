@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "../components";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "../components";
 import { useModal } from "../shared/modal/ModalContext";
 import UserModal from "../features/user/ui/UserModal";
 import PostCreateModal from "../features/post/ui/PostCreateModal";
@@ -51,23 +51,12 @@ const PostsManager = () => {
   const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"));
   const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"));
   const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "");
-  const [selectedPost, setSelectedPost] = useState<PostModel | null>(null);
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
-  // const [showAddDialog, setShowAddDialog] = useState(false);
-  // const [showEditDialog, setShowEditDialog] = useState(false);
-  // const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 });
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
-  const [selectedComment, setSelectedComment] = useState<CommentModel | null>(null);
-  // const [newComment, setNewComment] = useState({ body: "", postId: null, userId: 1 });
-  // const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
-  // const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
-  // const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
-  // const [showUserModal, setShowUserModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState(null);
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -203,9 +192,7 @@ const PostsManager = () => {
 
   // 게시물 상세 보기
   const openPostDetail = (post: PostModel) => {
-    setSelectedPost(post);
     fetchComments(post.id);
-    // setShowPostDetailDialog(true);
     openModal((close) => (
       <PostDetailModal
         onClose={close}
@@ -217,7 +204,6 @@ const PostsManager = () => {
             searchQuery={searchQuery}
             onClickLikeAction={(comment) => likeComment(comment.id, post.id)}
             onClickEditAction={(comment) => {
-              setSelectedComment(comment);
               openModal((close) => (
                 <CommentEditModal onClose={close} updateComment={updateComment} selectedComment={comment} />
               ));
@@ -235,7 +221,6 @@ const PostsManager = () => {
   // 사용자 모달 열기
   const openUserModal = async (user: UserModel) => {
     const userData = await getUserApi(user.id);
-    setSelectedUser(userData);
     openModal((close) => <UserModal user={userData} onClose={close} />);
   };
 
@@ -335,139 +320,6 @@ const PostsManager = () => {
           <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={total} />
         </div>
       </CardContent>
-
-      {/* 게시물 추가 대화상자 */}
-      {/* <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 게시물 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="제목"
-              value={newPost.title}
-              onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
-            />
-            <Textarea
-              rows={30}
-              placeholder="내용"
-              value={newPost.body}
-              onChange={(e) => setNewPost({ ...newPost, body: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="사용자 ID"
-              value={newPost.userId}
-              onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
-            />
-            <Button onClick={addPost}>게시물 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* 게시물 수정 대화상자 */}
-      {/* <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>게시물 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Input
-              placeholder="제목"
-              value={selectedPost?.title || ""}
-              onChange={(e) => setSelectedPost({ ...selectedPost, title: e.target.value })}
-            />
-            <Textarea
-              rows={15}
-              placeholder="내용"
-              value={selectedPost?.body || ""}
-              onChange={(e) => setSelectedPost({ ...selectedPost, body: e.target.value })}
-            />
-            <Button onClick={updatePost}>게시물 업데이트</Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* 댓글 추가 대화상자 */}
-      {/* <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 댓글 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={newComment.body}
-              onChange={(e) => setNewComment({ ...newComment, body: e.target.value })}
-            />
-            <Button onClick={addComment}>댓글 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* 댓글 수정 대화상자 */}
-      {/* <Dialog open={showEditCommentDialog} onOpenChange={setShowEditCommentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>댓글 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={selectedComment?.body || ""}
-              onChange={(e) => setSelectedComment({ ...selectedComment, body: e.target.value })}
-            />
-            <Button onClick={updateComment}>댓글 업데이트</Button>
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* 게시물 상세 보기 대화상자 */}
-      {/* <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{highlightText(selectedPost?.title, searchQuery)}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>{highlightText(selectedPost?.body, searchQuery)}</p>
-            {renderComments(selectedPost?.id)}
-          </div>
-        </DialogContent>
-      </Dialog> */}
-
-      {/* 사용자 모달 */}
-      {/* <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>사용자 정보</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <img src={selectedUser?.image} alt={selectedUser?.username} className="w-24 h-24 rounded-full mx-auto" />
-            <h3 className="text-xl font-semibold text-center">{selectedUser?.username}</h3>
-            <div className="space-y-2">
-              <p>
-                <strong>이름:</strong> {selectedUser?.firstName} {selectedUser?.lastName}
-              </p>
-              <p>
-                <strong>나이:</strong> {selectedUser?.age}
-              </p>
-              <p>
-                <strong>이메일:</strong> {selectedUser?.email}
-              </p>
-              <p>
-                <strong>전화번호:</strong> {selectedUser?.phone}
-              </p>
-              <p>
-                <strong>주소:</strong> {selectedUser?.address?.address}, {selectedUser?.address?.city},{" "}
-                {selectedUser?.address?.state}
-              </p>
-              <p>
-                <strong>직장:</strong> {selectedUser?.company?.name} - {selectedUser?.company?.title}
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog> */}
     </Card>
   );
 };
