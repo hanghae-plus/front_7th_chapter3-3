@@ -26,9 +26,15 @@ export const usePostTags = () => {
 }
 
 export const usePostSearch = (query: string) => {
-  return useQuery(postQueries.search(query))
+  return useQuery({
+    ...postQueries.search(query),
+    enabled: !!query.trim(),
+  })
 }
 
 export const usePostByTag = (tag: string) => {
-  return useQuery(postQueries.byTag(tag))
+  return useQuery({
+    ...postQueries.byTag(tag),
+    enabled: !!tag && tag !== "all",
+  })
 }

@@ -6,5 +6,8 @@ export const useSuspenseCommentList = (postId: number) => {
 }
 
 export const useCommentList = (postId: number) => {
-  return useQuery(commentQueries.list(postId))
+  return useQuery({
+    ...commentQueries.list(postId),
+    enabled: postId > 0,
+  })
 }

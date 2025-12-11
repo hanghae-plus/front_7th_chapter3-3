@@ -72,7 +72,7 @@ const PostsManager = () => {
   const { data: tagsData } = usePostTags()
   const tags = tagsData || []
 
-  const { data: usersData } = useUserList("username,image")
+  const { data: usersData } = useUserList(0, "username,image")
   const users = usersData?.users || []
 
   // 조건부 쿼리: 검색, 태그, 일반 리스트

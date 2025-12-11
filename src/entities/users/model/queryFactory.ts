@@ -8,10 +8,10 @@ export const userQueries = {
 
   details: () => [...userQueries.all(), "detail"],
 
-  list: (filters: string) =>
+  list: (limit: number, filters: string) =>
     queryOptions({
       queryKey: [...userQueries.lists(), filters],
-      queryFn: () => fetchUsers(),
+      queryFn: () => fetchUsers(limit, filters),
     }),
 
   detail: (id: number) =>
