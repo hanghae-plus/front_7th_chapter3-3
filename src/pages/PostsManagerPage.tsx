@@ -32,6 +32,15 @@ import {
   deleteComment as deleteCommentAPI,
   likeComment as likeCommentAPI,
 } from "../entities/comments/api"
+import {
+  fetchPosts as fetchPostsAPI,
+  fetchTags as fetchTagsAPI,
+  searchPosts as searchPostsAPI,
+  fetchPostsByTag as fetchPostsByTagAPI,
+  createPost as createPostAPI,
+  updatePost as updatePostAPI,
+  deletePost as deletePostAPI,
+} from "../entities/posts/api"
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -75,40 +84,32 @@ const PostsManager = () => {
   }
 
   // 게시물 가져오기
-  const fetchPosts = () => {
+  const fetchPosts = async () => {
     setLoading(true)
-    let postsData
-    let usersData
-
-    fetch(`/api/posts?limit=${limit}&skip=${skip}`)
-      .then((response) => response.json())
-      .then((data) => {
-        postsData = data
-        return fetch("/api/users?limit=0&select=username,image")
-      })
-      .then((response) => response.json())
-      .then((users) => {
-        usersData = users.users
-        const postsWithUsers = postsData.posts.map((post) => ({
-          ...post,
-          author: usersData.find((user) => user.id === post.userId),
-        }))
-        setPosts(postsWithUsers)
-        setTotal(postsData.total)
-      })
-      .catch((error) => {
-        console.error("게시물 가져오기 오류:", error)
-      })
-      .finally(() => {
-        setLoading(false)
-      })
+    try {
+      const [postsData, usersResponse] = await Promise.all([
+        fetchPostsAPI(limit, skip),
+        fetch("/api/users?limit=0&select=username,image"),
+      ])
+      const users = await usersResponse.json()
+      const usersData = users.users
+      const postsWithUsers = postsData.posts.map((post) => ({
+        ...post,
+        author: usersData.find((user) => user.id === post.userId),
+      }))
+      setPosts(postsWithUsers)
+      setTotal(postsData.total)
+    } catch (error) {
+      console.error("게시물 가져오기 오류:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   // 태그 가져오기
   const fetchTags = async () => {
     try {
-      const response = await fetch("/api/posts/tags")
-      const data = await response.json()
+      const data = await fetchTagsAPI()
       setTags(data)
     } catch (error) {
       console.error("태그 가져오기 오류:", error)
@@ -123,8 +124,7 @@ const PostsManager = () => {
     }
     setLoading(true)
     try {
-      const response = await fetch(`/api/posts/search?q=${searchQuery}`)
-      const data = await response.json()
+      const data = await searchPostsAPI(searchQuery)
       setPosts(data.posts)
       setTotal(data.total)
     } catch (error) {
@@ -141,11 +141,10 @@ const PostsManager = () => {
     }
     setLoading(true)
     try {
-      const [postsResponse, usersResponse] = await Promise.all([
-        fetch(`/api/posts/tag/${tag}`),
+      const [postsData, usersResponse] = await Promise.all([
+        fetchPostsByTagAPI(tag),
         fetch("/api/users?limit=0&select=username,image"),
       ])
-      const postsData = await postsResponse.json()
       const usersData = await usersResponse.json()
 
       const postsWithUsers = postsData.posts.map((post) => ({
@@ -164,12 +163,7 @@ const PostsManager = () => {
   // 게시물 추가
   const addPost = async () => {
     try {
-      const response = await fetch("/api/posts/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newPost),
-      })
-      const data = await response.json()
+      const data = await createPostAPI(newPost)
       setPosts([data, ...posts])
       setShowAddDialog(false)
       setNewPost({ title: "", body: "", userId: 1 })
@@ -180,13 +174,9 @@ const PostsManager = () => {
 
   // 게시물 업데이트
   const updatePost = async () => {
+    if (!selectedPost) return
     try {
-      const response = await fetch(`/api/posts/${selectedPost.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(selectedPost),
-      })
-      const data = await response.json()
+      const data = await updatePostAPI(selectedPost.id, selectedPost)
       setPosts(posts.map((post) => (post.id === data.id ? data : post)))
       setShowEditDialog(false)
     } catch (error) {
@@ -197,9 +187,7 @@ const PostsManager = () => {
   // 게시물 삭제
   const deletePost = async (id) => {
     try {
-      await fetch(`/api/posts/${id}`, {
-        method: "DELETE",
-      })
+      await deletePostAPI(id)
       setPosts(posts.filter((post) => post.id !== id))
     } catch (error) {
       console.error("게시물 삭제 오류:", error)
