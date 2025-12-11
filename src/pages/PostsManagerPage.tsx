@@ -17,8 +17,6 @@ const PostsManagerPage = () => {
   const searchQuery = searchParams.get("search") || ""
   const selectedTag = searchParams.get("tag") || ""
 
-  // ===== TanStack Query로 데이터 패칭 =====
-
   // 게시물 조회 (검색어, 태그, 페이지네이션 고려)
   // 검색어가 있을 때
   const searchResult = useQuery({

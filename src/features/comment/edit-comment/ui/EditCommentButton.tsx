@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Edit2 } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "@/shared/ui"
-import { Comment, useUpdateComment } from "@/entities/comment"
+import { Comment } from "@/entities/comment"
+import { useUpdateComment } from "../api/use-update-comment"
 
 interface EditCommentButtonProps {
   comment: Comment

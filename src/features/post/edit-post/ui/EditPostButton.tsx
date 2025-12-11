@@ -1,7 +1,8 @@
 import { useState } from "react"
 import { Edit2 } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "@/shared/ui"
-import { Post, useUpdatePost } from "@/entities/post"
+import { Post } from "@/entities/post"
+import { useUpdatePost } from "../api/use-update-post"
 
 interface EditPostButtonProps {
   post: Post

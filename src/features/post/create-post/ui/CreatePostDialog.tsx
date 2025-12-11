@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "@/shared/ui"
-import { useCreatePost } from "@/entities/post"
+import { useCreatePost } from "../api/use-create-post"
 import { useOverlay } from "@/shared/lib/overlay"
 
 interface CreatePostDialogProps {

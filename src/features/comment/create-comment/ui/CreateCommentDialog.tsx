@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "@/shared/ui"
-import { useCreateComment } from "@/entities/comment"
+import { useCreateComment } from "../api/use-create-comment"
 
 interface CreateCommentDialogProps {
   postId: number
