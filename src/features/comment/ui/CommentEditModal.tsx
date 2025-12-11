@@ -1,13 +1,13 @@
 import { BaseModalProps } from "../../../shared/modal/types";
 import ModalComponent from "../../../shared/modal/ModalComponent";
-import { CommentFormData } from "../model/types";
+import { CommentFormData, UpdateCommentFormData } from "../model/types";
 import { useState } from "react";
 import { Button, Textarea } from "../../../components";
 import { CommentModel } from "../../../entities/comment/model/types";
 
 interface CommentEditModalProps extends BaseModalProps {
   onClose: () => void;
-  updateComment: (commentForm: CommentFormData) => void;
+  updateComment: (commentId: number, commentForm: UpdateCommentFormData) => void;
   selectedComment: CommentModel;
 }
 
@@ -27,7 +27,7 @@ export default function CommentEditModal({ onClose, updateComment, selectedComme
         />
         <Button
           onClick={() => {
-            updateComment(commentForm);
+            updateComment(selectedComment.id, commentForm);
             onClose();
           }}
         >

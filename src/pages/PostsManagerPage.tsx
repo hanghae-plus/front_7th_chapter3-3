@@ -22,7 +22,7 @@ import PostDetailModal from "../features/post/ui/PostDetailModal";
 import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
 import { PostFormData } from "../features/post/model/types";
 import { PostModel } from "../entities/post/model/types";
-import { CommentFormData } from "../features/comment/model/types";
+import { CommentFormData, UpdateCommentFormData } from "../features/comment/model/types";
 import CommentEditModal from "../features/comment/ui/CommentEditModal";
 import Pagination from "../shared/ui/Pagination";
 import { UserModel } from "../entities/user/model/types";
@@ -31,6 +31,7 @@ import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
 import { getUserApi } from "../entities/user/api/user-api";
 import { addPostApi, deletePostApi, updatePostApi } from "../entities/post/api/post-api";
+import { addCommentApi, deleteCommentApi, likeCommentApi, updateCommentApi } from "../entities/comment/api/comment-api";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -195,76 +196,45 @@ const PostsManager = () => {
 
   // 댓글 추가
   const addComment = async (commentForm: CommentFormData) => {
-    try {
-      const response = await fetch("/api/comments/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(commentForm),
-      });
-      const data = await response.json();
-      setComments((prev) => ({
-        ...prev,
-        [data.postId]: [...(prev[data.postId] || []), data],
-      }));
-      // setShowAddCommentDialog(false);
-      // setNewComment({ body: "", postId: null, userId: 1 });
-    } catch (error) {
-      console.error("댓글 추가 오류:", error);
-    }
+    const commentData = await addCommentApi(commentForm);
+    setComments((prev) => ({
+      ...prev,
+      [commentForm.postId]: [...(prev[commentForm.postId] || []), commentData],
+    }));
   };
 
   // 댓글 업데이트
-  const updateComment = async (commentForm: CommentFormData) => {
-    try {
-      const response = await fetch(`/api/comments/${selectedComment.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: commentForm.body }),
-      });
-      const data = await response.json();
-      setComments((prev) => ({
-        ...prev,
-        [data.postId]: prev[data.postId].map((comment) => (comment.id === data.id ? data : comment)),
-      }));
-      // setShowEditCommentDialog(false);
-    } catch (error) {
-      console.error("댓글 업데이트 오류:", error);
-    }
+  const updateComment = async (commentId: number, commentForm: UpdateCommentFormData) => {
+    const commentData = await updateCommentApi(commentId, commentForm);
+    setComments((prev) => ({
+      ...prev,
+      [commentData.postId]: prev[commentData.postId].map((comment) =>
+        comment.id === commentId ? commentData : comment,
+      ),
+    }));
   };
 
   // 댓글 삭제
-  const deleteComment = async (id, postId) => {
-    try {
-      await fetch(`/api/comments/${id}`, {
-        method: "DELETE",
-      });
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].filter((comment) => comment.id !== id),
-      }));
-    } catch (error) {
-      console.error("댓글 삭제 오류:", error);
-    }
+  const deleteComment = async (commentId: number, postId: number) => {
+    await deleteCommentApi(commentId);
+    setComments((prev) => ({
+      ...prev,
+      [postId]: prev[postId].filter((comment) => comment.id !== commentId),
+    }));
   };
 
   // 댓글 좋아요
-  const likeComment = async (id, postId) => {
-    try {
-      const response = await fetch(`/api/comments/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ likes: comments[postId].find((c) => c.id === id).likes + 1 }),
-      });
-      const data = await response.json();
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].map((comment) =>
-          comment.id === data.id ? { ...data, likes: comment.likes + 1 } : comment,
-        ),
-      }));
-    } catch (error) {
-      console.error("댓글 좋아요 오류:", error);
+  const likeComment = async (commentId: number, postId: number) => {
+    const comment = comments[postId].find((c) => c.id === commentId);
+    if (!comment) {
+      console.error("댓글을 찾을 수 없습니다.");
+      return;
     }
+    const commentData = await likeCommentApi(commentId, comment.likes + 1);
+    setComments((prev) => ({
+      ...prev,
+      [postId]: prev[postId].map((comment) => (comment.id === commentData.id ? commentData : comment)),
+    }));
   };
 
   // 게시물 상세 보기

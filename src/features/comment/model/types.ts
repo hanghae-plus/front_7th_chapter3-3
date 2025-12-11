@@ -1,3 +1,5 @@
-import { CommentModel } from "../../../entities/comment/model/types";
+import { AddCommentDto, UpdateCommentDto } from "../../../entities/comment/api/dto";
 
-export type CommentFormData = Pick<CommentModel, "body" | "postId"> & { userId: number };
+export type CommentFormData = AddCommentDto;
+
+export type UpdateCommentFormData = UpdateCommentDto;
