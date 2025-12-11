@@ -7,10 +7,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
   Input,
   Select,
   SelectContent,
@@ -23,16 +19,18 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  Textarea,
 } from "../components";
 import { useModal } from "../shared/modal/ModalContext";
 import UserModal from "../features/user/ui/UserModal";
 import PostCreateModal from "../features/post/ui/PostCreateModal";
 import PostEditModal from "../features/post/ui/PostEditModal";
 import PostDetailModal from "../features/post/ui/PostDetailModal";
+import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
 import { highlightText } from "../shared/utils/highlight";
 import { PostFormData } from "../features/post/model/types";
 import { PostModel } from "../entities/post/model/types";
+import { CommentFormData } from "../features/comment/model/types";
+import CommentEditModal from "../features/comment/ui/CommentEditModal";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -51,18 +49,18 @@ const PostsManager = () => {
   const [selectedPost, setSelectedPost] = useState<PostModel | null>(null);
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 });
+  // const [showAddDialog, setShowAddDialog] = useState(false);
+  // const [showEditDialog, setShowEditDialog] = useState(false);
+  // const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 });
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
   const [comments, setComments] = useState({});
   const [selectedComment, setSelectedComment] = useState(null);
-  const [newComment, setNewComment] = useState({ body: "", postId: null, userId: 1 });
-  const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
-  const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
-  const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
+  // const [newComment, setNewComment] = useState({ body: "", postId: null, userId: 1 });
+  // const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
+  // const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
+  // const [showPostDetailDialog, setShowPostDetailDialog] = useState(false);
   // const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -226,20 +224,20 @@ const PostsManager = () => {
   };
 
   // 댓글 추가
-  const addComment = async () => {
+  const addComment = async (commentForm: CommentFormData) => {
     try {
       const response = await fetch("/api/comments/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newComment),
+        body: JSON.stringify(commentForm),
       });
       const data = await response.json();
       setComments((prev) => ({
         ...prev,
         [data.postId]: [...(prev[data.postId] || []), data],
       }));
-      setShowAddCommentDialog(false);
-      setNewComment({ body: "", postId: null, userId: 1 });
+      // setShowAddCommentDialog(false);
+      // setNewComment({ body: "", postId: null, userId: 1 });
     } catch (error) {
       console.error("댓글 추가 오류:", error);
     }
@@ -258,7 +256,7 @@ const PostsManager = () => {
         ...prev,
         [data.postId]: prev[data.postId].map((comment) => (comment.id === data.id ? data : comment)),
       }));
-      setShowEditCommentDialog(false);
+      // setShowEditCommentDialog(false);
     } catch (error) {
       console.error("댓글 업데이트 오류:", error);
     }
@@ -446,8 +444,9 @@ const PostsManager = () => {
         <Button
           size="sm"
           onClick={() => {
-            setNewComment((prev) => ({ ...prev, postId }));
-            setShowAddCommentDialog(true);
+            openModal((close) => <CommentCreateModal onClose={close} addComment={addComment} postId={postId} />);
+            // setNewComment((prev) => ({ ...prev, postId }));
+            // setShowAddCommentDialog(true);
           }}
         >
           <Plus className="w-3 h-3 mr-1" />
@@ -470,8 +469,11 @@ const PostsManager = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
-                  setSelectedComment(comment);
-                  setShowEditCommentDialog(true);
+                  // setSelectedComment(comment);
+                  // setShowEditCommentDialog(true);
+                  openModal((close) => (
+                    <CommentEditModal onClose={close} updateComment={updateComment} selectedComment={comment} />
+                  ));
                 }}
               >
                 <Edit2 className="w-3 h-3" />
@@ -639,7 +641,7 @@ const PostsManager = () => {
       </Dialog> */}
 
       {/* 댓글 추가 대화상자 */}
-      <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
+      {/* <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>새 댓글 추가</DialogTitle>
@@ -653,10 +655,10 @@ const PostsManager = () => {
             <Button onClick={addComment}>댓글 추가</Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* 댓글 수정 대화상자 */}
-      <Dialog open={showEditCommentDialog} onOpenChange={setShowEditCommentDialog}>
+      {/* <Dialog open={showEditCommentDialog} onOpenChange={setShowEditCommentDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>댓글 수정</DialogTitle>
@@ -670,7 +672,7 @@ const PostsManager = () => {
             <Button onClick={updateComment}>댓글 업데이트</Button>
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       {/* 게시물 상세 보기 대화상자 */}
       {/* <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>
