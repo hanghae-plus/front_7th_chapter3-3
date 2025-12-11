@@ -9,7 +9,7 @@ import PostEditModal from "../features/post/ui/PostEditModal";
 import PostDetailModal from "../features/post/ui/PostDetailModal";
 import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
 import { PostFormData } from "../features/post/model/types";
-import { PostModel } from "../entities/post/model/types";
+import { PostModel, PostTagModel } from "../entities/post/model/types";
 import { CommentFormData, UpdateCommentFormData } from "../features/comment/model/types";
 import CommentEditModal from "../features/comment/ui/CommentEditModal";
 import Pagination from "../shared/ui/Pagination";
@@ -34,8 +34,7 @@ import {
   likeCommentApi,
   updateCommentApi,
 } from "../entities/comment/api/comment-api";
-import SelectDropdown from "../shared/ui/SelectDropdown";
-import PostsSearchBar from "../features/post-filter/ui/PostsSearchBar";
+import PostsFilters from "../features/post-filter/ui/PostsFilters";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -54,7 +53,7 @@ const PostsManager = () => {
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
   const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState<string[]>([]);
+  const [tags, setTags] = useState<PostTagModel[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
 
@@ -92,17 +91,17 @@ const PostsManager = () => {
   };
 
   // 게시물 검색
-  const searchPosts = async () => {
-    if (!searchQuery) {
-      fetchPosts();
-      return;
-    }
-    setLoading(true);
-    const postsData = await getPostsBySearchApi(searchQuery);
-    setPosts(postsData.posts);
-    setTotal(postsData.total);
-    setLoading(false);
-  };
+  // const searchPosts = async () => {
+  //   if (!searchQuery) {
+  //     fetchPosts();
+  //     return;
+  //   }
+  //   setLoading(true);
+  //   const postsData = await getPostsBySearchApi(searchQuery);
+  //   setPosts(postsData.posts);
+  //   setTotal(postsData.total);
+  //   setLoading(false);
+  // };
 
   // 태그별 게시물 가져오기
   const fetchPostsByTag = async (tag?: string) => {
@@ -261,7 +260,8 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <div className="flex gap-4">
+          <PostsFilters skip={skip} limit={limit} tags={tags} />
+          {/* <div className="flex gap-4">
             <PostsSearchBar searchQuery={searchQuery} onChange={setSearchQuery} onEnter={searchPosts} />
             <SelectDropdown
               options={tags.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url }))}
@@ -293,7 +293,7 @@ const PostsManager = () => {
               onChange={setSortOrder}
               placeholder="정렬 순서"
             />
-          </div>
+          </div> */}
 
           {/* 게시물 테이블 */}
           {loading ? (

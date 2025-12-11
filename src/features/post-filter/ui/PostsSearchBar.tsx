@@ -1,13 +1,14 @@
 import { Search } from "lucide-react";
 import { Input } from "../../../components";
+import { useState } from "react";
 
 interface PostsSearchBarProps {
   searchQuery: string;
-  onChange: (value: string) => void;
-  onEnter: () => void;
+  onEnter: (searchKeyword: string) => void;
 }
 
-export default function PostsSearchBar({ searchQuery, onChange, onEnter }: PostsSearchBarProps) {
+export default function PostsSearchBar({ searchQuery, onEnter }: PostsSearchBarProps) {
+  const [searchKeyword, setSearchKeyword] = useState(searchQuery);
   return (
     <div className="flex-1">
       <div className="relative">
@@ -15,9 +16,9 @@ export default function PostsSearchBar({ searchQuery, onChange, onEnter }: Posts
         <Input
           placeholder="게시물 검색..."
           className="pl-8"
-          value={searchQuery}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && onEnter()}
+          value={searchKeyword}
+          onChange={(e) => setSearchKeyword(e.target.value)}
+          onKeyPress={(e) => e.key === "Enter" && onEnter(searchKeyword)}
         />
       </div>
     </div>
