@@ -41,6 +41,8 @@ import {
   updatePost as updatePostAPI,
   deletePost as deletePostAPI,
 } from "../entities/posts/api"
+import { fetchUsers as fetchUsersAPI, fetchUserById as fetchUserByIdAPI } from "../entities/users/api"
+import { User } from "../entities/users/types"
 
 const PostsManager = () => {
   const navigate = useNavigate()
@@ -69,7 +71,7 @@ const PostsManager = () => {
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -87,15 +89,10 @@ const PostsManager = () => {
   const fetchPosts = async () => {
     setLoading(true)
     try {
-      const [postsData, usersResponse] = await Promise.all([
-        fetchPostsAPI(limit, skip),
-        fetch("/api/users?limit=0&select=username,image"),
-      ])
-      const users = await usersResponse.json()
-      const usersData = users.users
+      const [postsData, usersData] = await Promise.all([fetchPostsAPI(limit, skip), fetchUsersAPI(0, "username,image")])
       const postsWithUsers = postsData.posts.map((post) => ({
         ...post,
-        author: usersData.find((user) => user.id === post.userId),
+        author: usersData.users.find((user) => user.id === post.userId),
       }))
       setPosts(postsWithUsers)
       setTotal(postsData.total)
@@ -141,11 +138,7 @@ const PostsManager = () => {
     }
     setLoading(true)
     try {
-      const [postsData, usersResponse] = await Promise.all([
-        fetchPostsByTagAPI(tag),
-        fetch("/api/users?limit=0&select=username,image"),
-      ])
-      const usersData = await usersResponse.json()
+      const [postsData, usersData] = await Promise.all([fetchPostsByTagAPI(tag), fetchUsersAPI(0, "username,image")])
 
       const postsWithUsers = postsData.posts.map((post) => ({
         ...post,
@@ -283,8 +276,7 @@ const PostsManager = () => {
   // 사용자 모달 열기
   const openUserModal = async (user) => {
     try {
-      const response = await fetch(`/api/users/${user.id}`)
-      const userData = await response.json()
+      const userData = await fetchUserByIdAPI(user.id)
       setSelectedUser(userData)
       setShowUserModal(true)
     } catch (error) {
