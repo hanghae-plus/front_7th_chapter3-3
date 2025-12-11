@@ -8,5 +8,5 @@ interface ModalRootProps {
 export default function ModalRoot({ activeModal, closeModal }: ModalRootProps) {
   if (!activeModal) return null;
 
-  return activeModal.render(!!activeModal, closeModal);
+  return activeModal.render(closeModal);
 }
