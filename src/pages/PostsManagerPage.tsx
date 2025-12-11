@@ -1,10 +1,8 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui"
 import { Post, postQueries } from "@/entities/post"
-import { userQueries } from "@/entities/user"
-import { tagQueries } from "@/entities/tag"
 import { CreatePostDialog } from "@/features/create-post"
 import { ViewUserInfoDialog } from "@/features/view-user-info"
 import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/widgets/index"
@@ -28,13 +26,7 @@ const PostsManagerPage = () => {
 
   // ===== TanStack Query로 데이터 패칭 =====
 
-  // 1. 태그 목록 조회
-  const { data: tags = [] } = useQuery(tagQueries.list())
-
-  // 2. 사용자 목록 조회 (author 정보용)
-  const { data: usersData } = useQuery(userQueries.list({ limit: 0, select: "username,image" }))
-
-  // 3. 게시물 조회 (검색어, 태그, 페이지네이션 고려)
+  // 게시물 조회 (검색어, 태그, 페이지네이션 고려)
   // 검색어가 있을 때
   const searchResult = useQuery({
     ...postQueries.search(searchQuery),
@@ -57,16 +49,7 @@ const PostsManagerPage = () => {
   const postsData = searchQuery ? searchResult.data : selectedTag ? tagResult.data : listResult.data
   const isLoading = searchQuery ? searchResult.isLoading : selectedTag ? tagResult.isLoading : listResult.isLoading
 
-  // 게시물 + 사용자 정보 조합 (useMemo로 최적화)
-  const posts = useMemo(() => {
-    if (!postsData || !usersData) return []
-
-    return postsData.posts.map((post) => ({
-      ...post,
-      author: usersData.users.find((user) => user.id === post.userId),
-    }))
-  }, [postsData, usersData])
-
+  const posts = postsData?.posts || []
   const total = postsData?.total || 0
 
   // ===== URL 업데이트 함수 =====
@@ -145,7 +128,6 @@ const PostsManagerPage = () => {
             selectedTag={selectedTag}
             sortBy={sortBy}
             sortOrder={sortOrder}
-            tags={tags}
             onSearch={handleSearch}
             onTagChange={handleTagChange}
             onSortByChange={handleSortByChange}

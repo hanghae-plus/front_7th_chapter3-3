@@ -1,14 +1,14 @@
+import { useQuery } from "@tanstack/react-query"
 import { SearchBar } from "@/features/search-posts"
 import { TagFilter } from "@/features/filter-by-tag"
 import { SortControls } from "@/features/sort-posts"
-import { Tag } from "@/entities/tag"
+import { tagQueries } from "@/entities/tag"
 
 interface PostsFilterPanelProps {
   searchQuery: string
   selectedTag: string
   sortBy: string
   sortOrder: string
-  tags: Tag[]
   onSearch: (query: string) => void
   onTagChange: (tag: string) => void
   onSortByChange: (value: string) => void
@@ -20,12 +20,13 @@ export const PostsFilterPanel = ({
   selectedTag,
   sortBy,
   sortOrder,
-  tags,
   onSearch,
   onTagChange,
   onSortByChange,
   onSortOrderChange,
 }: PostsFilterPanelProps) => {
+  // 위젯 자체적으로 tags 데이터 조회 (props drilling 제거)
+  const { data: tags = [] } = useQuery(tagQueries.list())
   return (
     <div className="flex gap-4">
       <SearchBar initialValue={searchQuery} onSearch={onSearch} />

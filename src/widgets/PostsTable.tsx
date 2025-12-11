@@ -1,7 +1,9 @@
+import { useMemo } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui"
 import { Post } from "@/entities/post"
 import { PostReactions, PostTags } from "@/entities/post"
-import { UserAvatar } from "@/entities/user"
+import { UserAvatar, userQueries } from "@/entities/user"
 import { EditPostButton } from "@/features/edit-post"
 import { DeletePostButton } from "@/features/delete-post"
 import { ViewPostDetailButton } from "@/features/view-post-detail"
@@ -26,6 +28,18 @@ export const PostsTable = ({
   onPostDetailClick,
   onPostsUpdate,
 }: PostsTableProps) => {
+  // 위젯 자체적으로 users 데이터 조회하여 posts와 조합
+  const { data: usersData } = useQuery(userQueries.list({ limit: 0, select: "username,image" }))
+
+  const postsWithAuthors = useMemo(() => {
+    if (!usersData) return posts
+
+    return posts.map((post) => ({
+      ...post,
+      author: usersData.users.find((user) => user.id === post.userId),
+    }))
+  }, [posts, usersData])
+
   return (
     <Table>
       <TableHeader>
@@ -38,7 +52,7 @@ export const PostsTable = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {posts.map((post) => (
+        {postsWithAuthors.map((post) => (
           <TableRow key={post.id}>
             <TableCell>{post.id}</TableCell>
             <TableCell>
