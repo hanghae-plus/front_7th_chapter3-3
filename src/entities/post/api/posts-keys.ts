@@ -8,4 +8,5 @@ export const postsKeys = {
   listByTag: (tag: string) => [...postsKeys.lists(), "tag", tag] as const,
   details: () => [...postsKeys.all, "detail"] as const,
   detail: (postId: number) => [...postsKeys.details(), postId] as const,
+  tags: () => [...postsKeys.all, "tags"] as const,
 };

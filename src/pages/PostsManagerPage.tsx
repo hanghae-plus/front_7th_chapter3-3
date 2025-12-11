@@ -9,7 +9,7 @@ import PostEditModal from "../features/post/ui/PostEditModal";
 import PostDetailModal from "../features/post/ui/PostDetailModal";
 import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
 import { PostFormData } from "../features/post/model/types";
-import { PostModel, PostTagModel } from "../entities/post/model/types";
+import { PostModel } from "../entities/post/model/types";
 import { CommentFormData, UpdateCommentFormData } from "../features/comment/model/types";
 import CommentEditModal from "../features/comment/ui/CommentEditModal";
 import Pagination from "../shared/ui/Pagination";
@@ -18,15 +18,7 @@ import PostTable from "../features/post/ui/PostTable";
 import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
 import { getUserApi, getUsersApi } from "../entities/user/api/user-api";
-import {
-  addPostApi,
-  deletePostApi,
-  getPostsApi,
-  getPostsBySearchApi,
-  getPostsByTagApi,
-  getPostTagsApi,
-  updatePostApi,
-} from "../entities/post/api/post-api";
+import { addPostApi, deletePostApi, getPostsApi, getPostsByTagApi, updatePostApi } from "../entities/post/api/post-api";
 import {
   addCommentApi,
   deleteCommentApi,
@@ -53,7 +45,7 @@ const PostsManager = () => {
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
   const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState<PostTagModel[]>([]);
+  // const [tags, setTags] = useState<PostTagModel[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
 
@@ -83,26 +75,6 @@ const PostsManager = () => {
     setTotal(postsData.total);
     setLoading(false);
   };
-
-  // 태그 가져오기
-  const fetchTags = async () => {
-    const tagsData = await getPostTagsApi();
-    setTags(tagsData);
-  };
-
-  // 게시물 검색
-  // const searchPosts = async () => {
-  //   if (!searchQuery) {
-  //     fetchPosts();
-  //     return;
-  //   }
-  //   setLoading(true);
-  //   const postsData = await getPostsBySearchApi(searchQuery);
-  //   setPosts(postsData.posts);
-  //   setTotal(postsData.total);
-  //   setLoading(false);
-  // };
-
   // 태그별 게시물 가져오기
   const fetchPostsByTag = async (tag?: string) => {
     if (!tag || tag === "all") {
@@ -224,10 +196,6 @@ const PostsManager = () => {
   };
 
   useEffect(() => {
-    fetchTags();
-  }, []);
-
-  useEffect(() => {
     if (selectedTag) {
       fetchPostsByTag(selectedTag);
     } else {
@@ -260,40 +228,7 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <PostsFilters skip={skip} limit={limit} tags={tags} />
-          {/* <div className="flex gap-4">
-            <PostsSearchBar searchQuery={searchQuery} onChange={setSearchQuery} onEnter={searchPosts} />
-            <SelectDropdown
-              options={tags.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url }))}
-              value={selectedTag}
-              onChange={(value) => {
-                setSelectedTag(value);
-                fetchPostsByTag(value);
-                updateURL();
-              }}
-              placeholder="태그 선택"
-            />
-            <SelectDropdown
-              options={[
-                { label: "없음", value: "none" },
-                { label: "ID", value: "id" },
-                { label: "제목", value: "title" },
-                { label: "반응", value: "reactions" },
-              ]}
-              value={sortBy}
-              onChange={setSortBy}
-              placeholder="정렬 기준"
-            />
-            <SelectDropdown
-              options={[
-                { label: "오름차순", value: "asc" },
-                { label: "내림차순", value: "desc" },
-              ]}
-              value={sortOrder}
-              onChange={setSortOrder}
-              placeholder="정렬 순서"
-            />
-          </div> */}
+          <PostsFilters skip={skip} limit={limit} />
 
           {/* 게시물 테이블 */}
           {loading ? (

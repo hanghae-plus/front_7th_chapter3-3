@@ -5,21 +5,22 @@ import { useState } from "react";
 import { usePostsWithSearchQuery } from "../../../entities/post/hooks/use-posts-with-search-query";
 import { usePostsQuery } from "../../../entities/post/hooks/use-posts-query";
 import { usePostsWithTagQuery } from "../../../entities/post/hooks/use-posts-with-tag-query";
-import { PostTagModel } from "../../../entities/post/model/types";
+import { useTagsQuery } from "../../../entities/post/hooks/use-tags-query";
 
 interface PostsFiltersProps {
   skip?: number;
   limit?: number;
-  tags: PostTagModel[];
 }
 
-export default function PostsFilters({ skip, limit, tags }: PostsFiltersProps) {
+export default function PostsFilters({ skip, limit }: PostsFiltersProps) {
   const { queryParams } = useUrlSearchParams();
   const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "");
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
 
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
+
+  const { data: tags } = useTagsQuery();
 
   usePostsQuery({ params: { skip: skip?.toString(), limit: limit?.toString(), sortBy, sortOrder } });
   usePostsWithSearchQuery({ searchQuery, enabled: !!searchQuery });
@@ -29,7 +30,7 @@ export default function PostsFilters({ skip, limit, tags }: PostsFiltersProps) {
     <div className="flex gap-4">
       <PostsSearchBar searchQuery={searchQuery} onEnter={(value) => setSearchQuery(value)} />
       <SelectDropdown
-        options={tags.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url }))}
+        options={tags?.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url })) || []}
         value={selectedTag}
         onChange={setSelectedTag}
         placeholder="태그 선택"
