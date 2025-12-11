@@ -1,5 +1,5 @@
 import { CommentModel } from "../model/types";
-import { AddCommentDto, UpdateCommentDto } from "./dto";
+import { AddCommentDto, CommentListApiResponse, UpdateCommentDto } from "./dto";
 
 export const addCommentApi = async (commentDto: AddCommentDto): Promise<CommentModel> => {
   try {
@@ -53,6 +53,17 @@ export const likeCommentApi = async (commentId: number, likes: number): Promise<
     return data;
   } catch (error) {
     console.error("댓글 좋아요 오류:", error);
+    throw error;
+  }
+};
+
+export const getCommentsApi = async (postId: number): Promise<CommentListApiResponse> => {
+  try {
+    const response = await fetch(`/api/comments/post/${postId}`);
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("댓글 가져오기 오류:", error);
     throw error;
   }
 };

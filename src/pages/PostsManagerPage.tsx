@@ -36,9 +36,16 @@ import {
   getPostsApi,
   getPostsBySearchApi,
   getPostsByTagApi,
+  getPostTagsApi,
   updatePostApi,
 } from "../entities/post/api/post-api";
-import { addCommentApi, deleteCommentApi, likeCommentApi, updateCommentApi } from "../entities/comment/api/comment-api";
+import {
+  addCommentApi,
+  deleteCommentApi,
+  getCommentsApi,
+  likeCommentApi,
+  updateCommentApi,
+} from "../entities/comment/api/comment-api";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -61,7 +68,7 @@ const PostsManager = () => {
   // const [showEditDialog, setShowEditDialog] = useState(false);
   // const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 });
   const [loading, setLoading] = useState(false);
-  const [tags, setTags] = useState([]);
+  const [tags, setTags] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
   const [selectedComment, setSelectedComment] = useState<CommentModel | null>(null);
@@ -101,13 +108,8 @@ const PostsManager = () => {
 
   // 태그 가져오기
   const fetchTags = async () => {
-    try {
-      const response = await fetch("/api/posts/tags");
-      const data = await response.json();
-      setTags(data);
-    } catch (error) {
-      console.error("태그 가져오기 오류:", error);
-    }
+    const tagsData = await getPostTagsApi();
+    setTags(tagsData);
   };
 
   // 게시물 검색
@@ -162,13 +164,8 @@ const PostsManager = () => {
   // 댓글 가져오기
   const fetchComments = async (postId: number) => {
     if (comments[postId]) return; // 이미 불러온 댓글이 있으면 다시 불러오지 않음
-    try {
-      const response = await fetch(`/api/comments/post/${postId}`);
-      const data = await response.json();
-      setComments((prev) => ({ ...prev, [postId]: data.comments }));
-    } catch (error) {
-      console.error("댓글 가져오기 오류:", error);
-    }
+    const commentsData = await getCommentsApi(postId);
+    setComments((prev) => ({ ...prev, [postId]: commentsData.comments }));
   };
 
   // 댓글 추가
