@@ -1,0 +1,252 @@
+import { Plus } from "lucide-react"
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  Pagination,
+  Table,
+  TableBody,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/shared/ui"
+import { type Post } from "@/entities/post"
+import {
+  usePostsList,
+  useAddPost,
+  useAddPostDialog,
+  AddPostForm,
+  useEditPost,
+  useEditPostDialog,
+  EditPostForm,
+  useDeletePost,
+  usePostDetailDialog,
+} from "@/features/post"
+import { useUsersList, useUserDetailDialog } from "@/features/user"
+import { useTagsList } from "@/features/tag"
+import { PostDetailModal } from "@/widgets/post-detail-modal"
+import { UserDetailModal } from "@/widgets/user-detail-modal"
+import { PostsFilterBar } from "./posts-filter-bar"
+import { PostTableRow } from "./post-table-row"
+import { useState } from "react"
+import { useSearchParams } from "react-router-dom"
+
+export const PostsTable = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  const skip = parseInt(searchParams.get("skip") || "0")
+  const limit = parseInt(searchParams.get("limit") || "10")
+  const sortBy = searchParams.get("sortBy") || ""
+  const order = (searchParams.get("order") as "asc" | "desc") || "asc"
+  const searchQuery = searchParams.get("search") || ""
+  const selectedTag = searchParams.get("tag") || ""
+
+  const updateSearchParams = (updates: Record<string, string | number>) => {
+    const params = new URLSearchParams(searchParams)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === "" || value === 0 || (key === "limit" && value === 10) || (key === "order" && value === "asc")) {
+        params.delete(key)
+      } else {
+        params.set(key, value.toString())
+      }
+    })
+    setSearchParams(params, { replace: true })
+  }
+
+  const setSkip = (newSkip: number) => updateSearchParams({ skip: newSkip })
+  const setLimit = (newLimit: number) => updateSearchParams({ limit: newLimit, skip: 0 })
+  const setSortBy = (newSortBy: string) => updateSearchParams({ sortBy: newSortBy })
+  const setOrder = (newOrder: "asc" | "desc") => updateSearchParams({ order: newOrder })
+  const setSearchQuery = (newQuery: string) => updateSearchParams({ search: newQuery, skip: 0 })
+  const setSelectedTag = (newTag: string) => updateSearchParams({ tag: newTag, skip: 0 })
+
+  const { data: postsData, isLoading } = usePostsList({ skip, limit, sortBy, order, searchQuery, selectedTag })
+  const { data: usersData } = useUsersList()
+  const { data: tagsData } = useTagsList()
+
+  const { mutate: addPost } = useAddPost()
+  const { isOpen: isAddDialogOpen, open: openAddDialog, close: closeAddDialog } = useAddPostDialog()
+  const { mutate: editPost } = useEditPost()
+  const { isOpen: isEditDialogOpen, selectedPost, open: openEditDialog, close: closeEditDialog } = useEditPostDialog()
+  const { mutate: deletePost } = useDeletePost()
+
+  const {
+    isOpen: isPostDetailModalOpen,
+    selectedPost: selectedPostForDetail,
+    open: openPostDetailModal,
+    close: closePostDetailModal,
+  } = usePostDetailDialog()
+  const {
+    isOpen: isUserDetailModalOpen,
+    selectedUserId,
+    open: openUserDetailModal,
+    close: closeUserDetailModal,
+  } = useUserDetailDialog()
+
+  const [newPostForm, setNewPostForm] = useState({ title: "", body: "", userId: 1 })
+  const [editPostForm, setEditPostForm] = useState({ title: "", body: "" })
+
+  const postsWithUsers = postsData?.posts.map((post) => ({
+    ...post,
+    author: usersData?.users.find((user) => user.id === post.userId),
+  }))
+
+  // Handlers
+  const handleAddPost = () => {
+    addPost(newPostForm, {
+      onSuccess: () => {
+        // 첫 페이지로 이동 (새 게시물 확인 가능)
+        setSkip(0)
+        closeAddDialog()
+        setNewPostForm({ title: "", body: "", userId: 1 })
+      },
+    })
+  }
+
+  const handleEditPost = () => {
+    if (!selectedPost) return
+    editPost(
+      { id: selectedPost.id, data: editPostForm },
+      {
+        onSuccess: () => {
+          closeEditDialog()
+        },
+      },
+    )
+  }
+
+  const handleDeletePost = (id: number) => {
+    if (confirm("정말 삭제하시겠습니까?")) {
+      deletePost(id)
+    }
+  }
+
+  const handleOpenEditDialog = (post: Post) => {
+    openEditDialog(post)
+    setEditPostForm({ title: post.title, body: post.body })
+  }
+
+  return (
+    <Card className="w-full max-w-6xl mx-auto">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <span>게시물 관리자</span>
+          <Button onClick={openAddDialog}>
+            <Plus className="w-4 h-4 mr-2" />
+            게시물 추가
+          </Button>
+        </CardTitle>
+      </CardHeader>
+
+      <CardContent>
+        <div className="flex flex-col gap-4">
+          {/* 검색 및 필터 컨트롤 */}
+          <PostsFilterBar
+            searchQuery={searchQuery}
+            selectedTag={selectedTag}
+            sortBy={sortBy}
+            order={order}
+            tags={tagsData || []}
+            onSearchChange={setSearchQuery}
+            onTagChange={setSelectedTag}
+            onSortByChange={setSortBy}
+            onOrderChange={setOrder}
+          />
+
+          {/* 게시물 테이블 */}
+          {isLoading ? (
+            <div className="flex justify-center p-4">로딩 중...</div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[50px]">ID</TableHead>
+                  <TableHead>제목</TableHead>
+                  <TableHead className="w-[150px]">작성자</TableHead>
+                  <TableHead className="w-[150px]">반응</TableHead>
+                  <TableHead className="w-[150px]">작업</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {postsWithUsers?.map((post) => (
+                  <PostTableRow
+                    key={post.id}
+                    post={post}
+                    searchQuery={searchQuery}
+                    selectedTag={selectedTag}
+                    onPostDetailClick={() => openPostDetailModal(post)}
+                    onEditClick={handleOpenEditDialog}
+                    onDeleteClick={handleDeletePost}
+                    onUserClick={() => openUserDetailModal(post.userId)}
+                    onTagClick={setSelectedTag}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          )}
+
+          {/* 페이지네이션 */}
+          <Pagination
+            skip={skip}
+            limit={limit}
+            total={postsData?.total || 0}
+            onSkipChange={setSkip}
+            onLimitChange={setLimit}
+          />
+        </div>
+      </CardContent>
+
+      {/* 게시물 추가 대화상자 */}
+      <Dialog open={isAddDialogOpen} onOpenChange={(open) => !open && closeAddDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>새 게시물 추가</DialogTitle>
+          </DialogHeader>
+          <AddPostForm
+            title={newPostForm.title}
+            body={newPostForm.body}
+            userId={newPostForm.userId}
+            users={usersData?.users || []}
+            onTitleChange={(title: string) => setNewPostForm({ ...newPostForm, title })}
+            onBodyChange={(body: string) => setNewPostForm({ ...newPostForm, body })}
+            onUserIdChange={(userId: number) => setNewPostForm({ ...newPostForm, userId })}
+            onSubmit={handleAddPost}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* 게시물 수정 대화상자 */}
+      <Dialog open={isEditDialogOpen} onOpenChange={(open) => !open && closeEditDialog()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>게시물 수정</DialogTitle>
+          </DialogHeader>
+          <EditPostForm
+            title={editPostForm.title}
+            body={editPostForm.body}
+            onTitleChange={(title: string) => setEditPostForm({ ...editPostForm, title })}
+            onBodyChange={(body: string) => setEditPostForm({ ...editPostForm, body })}
+            onSubmit={handleEditPost}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* 게시물 상세 모달 */}
+      <PostDetailModal
+        post={selectedPostForDetail}
+        isOpen={isPostDetailModalOpen}
+        onClose={closePostDetailModal}
+        searchQuery={searchQuery}
+      />
+
+      {/* 사용자 상세 모달 */}
+      <UserDetailModal userId={selectedUserId} isOpen={isUserDetailModalOpen} onClose={closeUserDetailModal} />
+    </Card>
+  )
+}
