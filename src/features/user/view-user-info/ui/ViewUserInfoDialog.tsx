@@ -1,24 +1,24 @@
 import { useQuery } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui"
 import { userQueries } from "@/entities/user"
+import { OverlayController } from "@/shared/lib/overlay"
 
 interface ViewUserInfoDialogProps {
-  userId: number | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  userId: number
+  controller: OverlayController
 }
 
-export const ViewUserInfoDialog = ({ userId, open, onOpenChange }: ViewUserInfoDialogProps) => {
-  // TanStack Query로 사용자 정보 조회 (userId와 open 상태에 따라 조건부 실행)
+export const ViewUserInfoDialog = ({ userId, controller }: ViewUserInfoDialogProps) => {
+  // TanStack Query로 사용자 정보 조회 (open 상태에 따라 조건부 실행)
   const { data: user } = useQuery({
-    ...userQueries.detail(userId || 0),
-    enabled: !!userId && open, // userId가 있고 다이얼로그가 열렸을 때만 실행
+    ...userQueries.detail(userId),
+    enabled: controller.isOpen, // 다이얼로그가 열렸을 때만 실행
   })
 
   if (!user) return null
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={controller.isOpen} onOpenChange={(open) => !open && controller.close()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>사용자 정보</DialogTitle>

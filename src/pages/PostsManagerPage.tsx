@@ -1,4 +1,3 @@
-import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui"
@@ -6,21 +5,17 @@ import { Post, postQueries } from "@/entities/post"
 import { CreatePostDialog } from "@/features/post/create-post"
 import { ViewUserInfoDialog } from "@/features/user/view-user-info"
 import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/widgets/index"
+import { useOverlay } from "@/shared/lib/overlay"
 
 const PostsManagerPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const overlay = useOverlay()
 
   // URL 파라미터에서 상태 추출 (페이지네이션 및 데이터 패칭용)
   const skip = parseInt(searchParams.get("skip") || "0")
   const limit = parseInt(searchParams.get("limit") || "10")
   const searchQuery = searchParams.get("search") || ""
   const selectedTag = searchParams.get("tag") || ""
-
-  // UI 상태 (다이얼로그 관리)
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null)
-  const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
-  const [showUserModal, setShowUserModal] = useState(false)
-  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
 
   // ===== TanStack Query로 데이터 패칭 =====
 
@@ -75,13 +70,11 @@ const PostsManagerPage = () => {
   }
 
   const handlePostDetailClick = (post: Post) => {
-    setSelectedPost(post)
-    setShowPostDetailDialog(true)
+    overlay.open((controller) => <PostDetailDialog post={post} controller={controller} />)
   }
 
   const handleUserClick = (userId: number) => {
-    setSelectedUserId(userId)
-    setShowUserModal(true)
+    overlay.open((controller) => <ViewUserInfoDialog userId={userId} controller={controller} />)
   }
 
   return (
@@ -119,12 +112,6 @@ const PostsManagerPage = () => {
           />
         </div>
       </CardContent>
-
-      {/* 게시물 상세 보기 대화상자 */}
-      <PostDetailDialog post={selectedPost} open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog} />
-
-      {/* 사용자 모달 */}
-      <ViewUserInfoDialog userId={selectedUserId} open={showUserModal} onOpenChange={setShowUserModal} />
     </Card>
   )
 }

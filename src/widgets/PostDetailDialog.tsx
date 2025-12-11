@@ -5,14 +5,14 @@ import { Post } from "@/entities/post"
 import { commentQueries } from "@/entities/comment"
 import { CommentList } from "./CommentList"
 import { highlightText } from "@/shared/lib"
+import { OverlayController } from "@/shared/lib/overlay"
 
 interface PostDetailDialogProps {
-  post: Post | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  post: Post
+  controller: OverlayController
 }
 
-export const PostDetailDialog = ({ post, open, onOpenChange }: PostDetailDialogProps) => {
+export const PostDetailDialog = ({ post, controller }: PostDetailDialogProps) => {
   const [searchParams] = useSearchParams()
 
   // URL에서 직접 searchQuery 읽기
@@ -20,16 +20,14 @@ export const PostDetailDialog = ({ post, open, onOpenChange }: PostDetailDialogP
 
   // TanStack Query로 댓글 조회 (post와 open 상태에 따라 조건부 실행)
   const { data: commentsData } = useQuery({
-    ...commentQueries.listByPost(post?.id || 0),
-    enabled: !!post && open, // post가 있고 다이얼로그가 열렸을 때만 실행
+    ...commentQueries.listByPost(post.id),
+    enabled: controller.isOpen, // 다이얼로그가 열렸을 때만 실행
   })
 
   const comments = commentsData?.comments || []
 
-  if (!post) return null
-
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={controller.isOpen} onOpenChange={(open) => !open && controller.close()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{highlightText(post.title, searchQuery)}</DialogTitle>
