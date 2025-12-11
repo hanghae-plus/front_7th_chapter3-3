@@ -1,30 +1,13 @@
 import PostsSearchBar from "./PostsSearchBar";
 import SelectDropdown from "../../../shared/ui/SelectDropdown";
-import { useUrlSearchParams } from "../../../shared/hooks/use-url-search-params";
-import { useState } from "react";
-import { usePostsWithSearchQuery } from "../../../entities/post/hooks/use-posts-with-search-query";
-import { usePostsQuery } from "../../../entities/post/hooks/use-posts-query";
-import { usePostsWithTagQuery } from "../../../entities/post/hooks/use-posts-with-tag-query";
 import { useTagsQuery } from "../../../entities/post/hooks/use-tags-query";
+import { usePostFilters } from "../providers/PostFiltersContext";
 
-interface PostsFiltersProps {
-  skip?: number;
-  limit?: number;
-}
-
-export default function PostsFilters({ skip, limit }: PostsFiltersProps) {
-  const { queryParams } = useUrlSearchParams();
-  const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "");
-  const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
-  const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
-
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
+export default function PostsFilters() {
+  const { searchQuery, setSearchQuery, sortBy, setSortBy, sortOrder, setSortOrder, selectedTag, setSelectedTag } =
+    usePostFilters();
 
   const { data: tags } = useTagsQuery();
-
-  usePostsQuery({ params: { skip: skip?.toString(), limit: limit?.toString(), sortBy, sortOrder } });
-  usePostsWithSearchQuery({ searchQuery, enabled: !!searchQuery });
-  usePostsWithTagQuery({ tag: selectedTag, enabled: !!selectedTag });
 
   return (
     <div className="flex gap-4">

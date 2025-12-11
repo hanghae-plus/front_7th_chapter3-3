@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export function useUrlSearchParams() {
@@ -9,5 +10,10 @@ export function useUrlSearchParams() {
     queryParams.set(key, value);
     navigate(`?${queryParams.toString()}`);
   };
+
+  useEffect(() => {
+    navigate(`?${queryParams.toString()}`);
+  }, [location.search]);
+
   return { queryParams, handleUpdateQueryParams };
 }
