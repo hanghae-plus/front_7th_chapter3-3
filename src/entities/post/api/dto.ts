@@ -8,6 +8,8 @@ export type UpdatePostDto = Pick<PostModel, "title" | "body" | "userId">;
 export type PostGetQueryParams = {
   limit?: string;
   skip?: string;
+  sortBy?: string;
+  sortOrder?: string;
 };
 
 export type PostListApiResponse = BaseListApiResponse & {
