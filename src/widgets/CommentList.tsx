@@ -1,3 +1,4 @@
+import { useSearchParams } from "react-router-dom"
 import { Comment } from "@/entities/comment"
 import { CreateCommentDialog } from "@/features/comment/create-comment"
 import { EditCommentButton } from "@/features/comment/edit-comment"
@@ -8,11 +9,15 @@ import { highlightText } from "@/shared/lib"
 interface CommentListProps {
   postId: number
   comments: Comment[]
-  searchQuery: string
   onUpdate?: () => void // optional로 변경 (TanStack Query 사용 시 불필요)
 }
 
-export const CommentList = ({ postId, comments, searchQuery, onUpdate = () => {} }: CommentListProps) => {
+export const CommentList = ({ postId, comments, onUpdate = () => {} }: CommentListProps) => {
+  const [searchParams] = useSearchParams()
+
+  // URL에서 직접 searchQuery 읽기
+  const searchQuery = searchParams.get("search") || ""
+
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">

@@ -1,5 +1,6 @@
 import { useMemo } from "react"
 import { useQuery } from "@tanstack/react-query"
+import { useSearchParams } from "react-router-dom"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui"
 import { Post } from "@/entities/post"
 import { PostReactions, PostTags } from "@/entities/post"
@@ -11,23 +12,18 @@ import { highlightText } from "@/shared/lib"
 
 interface PostsTableProps {
   posts: Post[]
-  searchQuery: string
-  selectedTag: string
-  onTagClick: (tag: string) => void
   onUserClick: (userId: number) => void
   onPostDetailClick: (post: Post) => void
   onPostsUpdate: () => void
 }
 
-export const PostsTable = ({
-  posts,
-  searchQuery,
-  selectedTag,
-  onTagClick,
-  onUserClick,
-  onPostDetailClick,
-  onPostsUpdate,
-}: PostsTableProps) => {
+export const PostsTable = ({ posts, onUserClick, onPostDetailClick, onPostsUpdate }: PostsTableProps) => {
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // URL에서 직접 파라미터 읽기
+  const searchQuery = searchParams.get("search") || ""
+  const selectedTag = searchParams.get("tag") || ""
+
   // 위젯 자체적으로 users 데이터 조회하여 posts와 조합
   const { data: usersData } = useQuery(userQueries.list({ limit: 0, select: "username,image" }))
 
@@ -39,6 +35,15 @@ export const PostsTable = ({
       author: usersData.users.find((user) => user.id === post.userId),
     }))
   }, [posts, usersData])
+
+  // 태그 클릭 핸들러
+  const handleTagClick = (tag: string) => {
+    const newParams = new URLSearchParams(searchParams)
+    newParams.set("tag", tag)
+    newParams.set("skip", "0")
+    newParams.delete("search")
+    setSearchParams(newParams)
+  }
 
   return (
     <Table>
@@ -59,7 +64,7 @@ export const PostsTable = ({
               <div className="space-y-1">
                 <div>{highlightText(post.title, searchQuery)}</div>
                 {post.tags && (
-                  <PostTags tags={post.tags} selectedTag={selectedTag} onTagClick={onTagClick} />
+                  <PostTags tags={post.tags} selectedTag={selectedTag} onTagClick={handleTagClick} />
                 )}
               </div>
             </TableCell>

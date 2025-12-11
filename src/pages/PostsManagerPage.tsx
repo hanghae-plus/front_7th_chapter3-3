@@ -10,13 +10,11 @@ import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/wi
 const PostsManagerPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  // URL 파라미터에서 상태 추출
+  // URL 파라미터에서 상태 추출 (페이지네이션 및 데이터 패칭용)
   const skip = parseInt(searchParams.get("skip") || "0")
   const limit = parseInt(searchParams.get("limit") || "10")
   const searchQuery = searchParams.get("search") || ""
   const selectedTag = searchParams.get("tag") || ""
-  const sortBy = searchParams.get("sortBy") || ""
-  const sortOrder = searchParams.get("sortOrder") || "asc"
 
   // UI 상태 (다이얼로그 관리)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
@@ -52,7 +50,7 @@ const PostsManagerPage = () => {
   const posts = postsData?.posts || []
   const total = postsData?.total || 0
 
-  // ===== URL 업데이트 함수 =====
+  // ===== 이벤트 핸들러 =====
 
   const updateSearchParams = (updates: Record<string, string | number>) => {
     const newParams = new URLSearchParams(searchParams)
@@ -66,32 +64,6 @@ const PostsManagerPage = () => {
     })
 
     setSearchParams(newParams)
-  }
-
-  // ===== 이벤트 핸들러 =====
-
-  const handleSearch = (query: string) => {
-    updateSearchParams({
-      search: query,
-      skip: 0, // 검색 시 첫 페이지로
-      tag: "", // 검색 시 태그 필터 제거
-    })
-  }
-
-  const handleTagChange = (tag: string) => {
-    updateSearchParams({
-      tag,
-      skip: 0, // 태그 변경 시 첫 페이지로
-      search: "", // 태그 선택 시 검색어 제거
-    })
-  }
-
-  const handleSortByChange = (newSortBy: string) => {
-    updateSearchParams({ sortBy: newSortBy })
-  }
-
-  const handleSortOrderChange = (newSortOrder: string) => {
-    updateSearchParams({ sortOrder: newSortOrder })
   }
 
   const handleSkipChange = (newSkip: number) => {
@@ -123,16 +95,7 @@ const PostsManagerPage = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <PostsFilterPanel
-            searchQuery={searchQuery}
-            selectedTag={selectedTag}
-            sortBy={sortBy}
-            sortOrder={sortOrder}
-            onSearch={handleSearch}
-            onTagChange={handleTagChange}
-            onSortByChange={handleSortByChange}
-            onSortOrderChange={handleSortOrderChange}
-          />
+          <PostsFilterPanel />
 
           {/* 게시물 테이블 */}
           {isLoading ? (
@@ -140,9 +103,6 @@ const PostsManagerPage = () => {
           ) : (
             <PostsTable
               posts={posts}
-              searchQuery={searchQuery}
-              selectedTag={selectedTag}
-              onTagClick={handleTagChange}
               onUserClick={handleUserClick}
               onPostDetailClick={handlePostDetailClick}
               onPostsUpdate={() => {}}
@@ -161,12 +121,7 @@ const PostsManagerPage = () => {
       </CardContent>
 
       {/* 게시물 상세 보기 대화상자 */}
-      <PostDetailDialog
-        post={selectedPost}
-        open={showPostDetailDialog}
-        searchQuery={searchQuery}
-        onOpenChange={setShowPostDetailDialog}
-      />
+      <PostDetailDialog post={selectedPost} open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog} />
 
       {/* 사용자 모달 */}
       <ViewUserInfoDialog userId={selectedUserId} open={showUserModal} onOpenChange={setShowUserModal} />
