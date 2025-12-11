@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react"
-import { Edit2, MessageSquare, Plus, Search, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Edit2, MessageSquare, Plus, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react"
+import { useLocation } from "react-router-dom"
 import {
   Button,
   Card,
@@ -36,19 +36,30 @@ import {
 } from "../entities/comments/model"
 import { useUserList, useUserDetail } from "../entities/users/model"
 import { User } from "../entities/users/types"
+import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
+import { usePostSearchFilter } from "../features/search-filter-post/model"
 
 const PostsManager = () => {
-  const navigate = useNavigate()
   const location = useLocation()
   const queryParams = new URLSearchParams(location.search)
 
-  // URL 파라미터 상태
+  // 페이지네이션 상태
   const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"))
   const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"))
-  const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "")
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
-  const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "")
-  const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc")
+
+  // 검색/필터 상태 (usePostSearchFilter 훅 사용)
+  const {
+    searchQuery,
+    selectedTag,
+    sortBy,
+    sortOrder,
+    setSearchQuery,
+    setSelectedTag,
+    setSortBy,
+    setSortOrder,
+    handleSearch,
+    updateURL: updateFilterURL,
+  } = usePostSearchFilter()
 
   // UI 상태
   const [selectedPost, setSelectedPost] = useState<any>(null)
@@ -143,21 +154,12 @@ const PostsManager = () => {
 
   const likeCommentMutation = useLikeCommentMutation(selectedPostIdForComments || 0)
 
-  // URL 업데이트 함수
+  // URL 업데이트 함수 (skip, limit 포함)
   const updateURL = () => {
-    const params = new URLSearchParams()
-    if (skip) params.set("skip", skip.toString())
-    if (limit) params.set("limit", limit.toString())
-    if (searchQuery) params.set("search", searchQuery)
-    if (sortBy) params.set("sortBy", sortBy)
-    if (sortOrder) params.set("sortOrder", sortOrder)
-    if (selectedTag) params.set("tag", selectedTag)
-    navigate(`?${params.toString()}`)
-  }
-
-  // 게시물 검색 핸들러
-  const handleSearch = () => {
-    updateURL()
+    updateFilterURL(undefined, {
+      skip: skip.toString(),
+      limit: limit.toString(),
+    })
   }
 
   // 게시물 추가
@@ -225,18 +227,16 @@ const PostsManager = () => {
     }
   }, [userDetailData])
 
+  // skip, limit 변경 시 URL 업데이트
   useEffect(() => {
     updateURL()
-  }, [skip, limit, sortBy, sortOrder, selectedTag, searchQuery])
+  }, [skip, limit])
 
+  // URL 파라미터에서 skip, limit 읽기
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     setSkip(parseInt(params.get("skip") || "0"))
     setLimit(parseInt(params.get("limit") || "10"))
-    setSearchQuery(params.get("search") || "")
-    setSortBy(params.get("sortBy") || "")
-    setSortOrder(params.get("sortOrder") || "asc")
-    setSelectedTag(params.get("tag") || "")
   }, [location.search])
 
   // 하이라이트 함수 추가
@@ -396,59 +396,27 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="게시물 검색..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                />
-              </div>
-            </div>
-            <Select
-              value={selectedTag}
-              onValueChange={(value) => {
-                setSelectedTag(value)
-                updateURL()
-              }}
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="태그 선택" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">모든 태그</SelectItem>
-                {tags.map((tag: any) => (
-                  <SelectItem key={tag.url} value={tag.slug}>
-                    {tag.slug}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 기준" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">없음</SelectItem>
-                <SelectItem value="id">ID</SelectItem>
-                <SelectItem value="title">제목</SelectItem>
-                <SelectItem value="reactions">반응</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="정렬 순서" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="asc">오름차순</SelectItem>
-                <SelectItem value="desc">내림차순</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <PostSearchFilterBar
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            onSearch={handleSearch}
+            selectedTag={selectedTag}
+            onTagChange={(value) => {
+              setSelectedTag(value)
+              updateURL()
+            }}
+            tags={tags}
+            sortBy={sortBy}
+            onSortByChange={(value) => {
+              setSortBy(value)
+              updateURL()
+            }}
+            sortOrder={sortOrder}
+            onSortOrderChange={(value) => {
+              setSortOrder(value)
+              updateURL()
+            }}
+          />
 
           {/* 게시물 테이블 */}
           {isLoading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
