@@ -29,8 +29,15 @@ import { UserModel } from "../entities/user/model/types";
 import PostTable from "../features/post/ui/PostTable";
 import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
-import { getUserApi } from "../entities/user/api/user-api";
-import { addPostApi, deletePostApi, updatePostApi } from "../entities/post/api/post-api";
+import { getUserApi, getUsersApi } from "../entities/user/api/user-api";
+import {
+  addPostApi,
+  deletePostApi,
+  getPostsApi,
+  getPostsBySearchApi,
+  getPostsByTagApi,
+  updatePostApi,
+} from "../entities/post/api/post-api";
 import { addCommentApi, deleteCommentApi, likeCommentApi, updateCommentApi } from "../entities/comment/api/comment-api";
 
 const PostsManager = () => {
@@ -78,33 +85,18 @@ const PostsManager = () => {
   };
 
   // 게시물 가져오기
-  const fetchPosts = () => {
+  const fetchPosts = async () => {
     setLoading(true);
-    let postsData;
-    let usersData;
+    const postsData = await getPostsApi({ limit: limit.toString(), skip: skip.toString() });
+    const usersData = await getUsersApi({ limit: "0", select: "username,image" });
 
-    fetch(`/api/posts?limit=${limit}&skip=${skip}`)
-      .then((response) => response.json())
-      .then((data) => {
-        postsData = data;
-        return fetch("/api/users?limit=0&select=username,image");
-      })
-      .then((response) => response.json())
-      .then((users) => {
-        usersData = users.users;
-        const postsWithUsers = postsData.posts.map((post) => ({
-          ...post,
-          author: usersData.find((user) => user.id === post.userId),
-        }));
-        setPosts(postsWithUsers);
-        setTotal(postsData.total);
-      })
-      .catch((error) => {
-        console.error("게시물 가져오기 오류:", error);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    const postsWithUsers = postsData.posts.map((post: PostModel) => ({
+      ...post,
+      author: usersData.users.find((user: UserModel) => user.id === post.userId),
+    }));
+    setPosts(postsWithUsers);
+    setTotal(postsData.total);
+    setLoading(false);
   };
 
   // 태그 가져오기
@@ -125,42 +117,27 @@ const PostsManager = () => {
       return;
     }
     setLoading(true);
-    try {
-      const response = await fetch(`/api/posts/search?q=${searchQuery}`);
-      const data = await response.json();
-      setPosts(data.posts);
-      setTotal(data.total);
-    } catch (error) {
-      console.error("게시물 검색 오류:", error);
-    }
+    const postsData = await getPostsBySearchApi(searchQuery);
+    setPosts(postsData.posts);
+    setTotal(postsData.total);
     setLoading(false);
   };
 
   // 태그별 게시물 가져오기
-  const fetchPostsByTag = async (tag) => {
+  const fetchPostsByTag = async (tag?: string) => {
     if (!tag || tag === "all") {
       fetchPosts();
       return;
     }
     setLoading(true);
-    try {
-      const [postsResponse, usersResponse] = await Promise.all([
-        fetch(`/api/posts/tag/${tag}`),
-        fetch("/api/users?limit=0&select=username,image"),
-      ]);
-      const postsData = await postsResponse.json();
-      const usersData = await usersResponse.json();
-
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }));
-
-      setPosts(postsWithUsers);
-      setTotal(postsData.total);
-    } catch (error) {
-      console.error("태그별 게시물 가져오기 오류:", error);
-    }
+    const postsData = await getPostsByTagApi(tag);
+    const usersData = await getUsersApi({ limit: "0", select: "username,image" });
+    const postsWithUsers = postsData.posts.map((post) => ({
+      ...post,
+      author: usersData.users.find((user) => user.id === post.userId),
+    }));
+    setPosts(postsWithUsers);
+    setTotal(postsData.total);
     setLoading(false);
   };
 
