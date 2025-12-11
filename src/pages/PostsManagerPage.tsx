@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "../components";
 import { useModal } from "../shared/modal/ModalContext";
 import UserModal from "../features/user/ui/UserModal";
@@ -17,8 +17,8 @@ import { UserModel } from "../entities/user/model/types";
 import PostTable from "../features/post/ui/PostTable";
 import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
-import { getUserApi, getUsersApi } from "../entities/user/api/user-api";
-import { addPostApi, deletePostApi, getPostsApi, getPostsByTagApi, updatePostApi } from "../entities/post/api/post-api";
+import { getUserApi } from "../entities/user/api/user-api";
+import { addPostApi, deletePostApi, updatePostApi } from "../entities/post/api/post-api";
 import {
   addCommentApi,
   deleteCommentApi,
@@ -27,71 +27,25 @@ import {
   updateCommentApi,
 } from "../entities/comment/api/comment-api";
 import PostsFilters from "../features/post-filter/ui/PostsFilters";
+import { useUrlSearchParams } from "../shared/hooks/use-url-search-params";
+import { usePostFilters } from "../features/post-filter/providers/PostFiltersContext";
+import { usePostTableDataQuery } from "../features/post/hooks/use-post-table-data-query";
 
 const PostsManager = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
+  const { queryParams: urlQueryParams } = useUrlSearchParams();
+  const { searchQuery, sortBy, sortOrder, selectedTag, setSelectedTag } = usePostFilters();
 
   // Modal
   const { openModal } = useModal();
 
   // 상태 관리
   const [posts, setPosts] = useState<PostModel[]>([]);
-  const [total, setTotal] = useState(0);
-  const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"));
-  const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"));
-  const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "");
-  const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "");
-  const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc");
-  const [loading, setLoading] = useState(false);
-  // const [tags, setTags] = useState<PostTagModel[]>([]);
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
+  const [skip, setSkip] = useState(parseInt(urlQueryParams.get("skip") || "0"));
+  const [limit, setLimit] = useState(parseInt(urlQueryParams.get("limit") || "10"));
+
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
-
-  // URL 업데이트 함수
-  const updateURL = () => {
-    const params = new URLSearchParams();
-    if (skip) params.set("skip", skip.toString());
-    if (limit) params.set("limit", limit.toString());
-    if (searchQuery) params.set("search", searchQuery);
-    if (sortBy) params.set("sortBy", sortBy);
-    if (sortOrder) params.set("sortOrder", sortOrder);
-    if (selectedTag) params.set("tag", selectedTag);
-    navigate(`?${params.toString()}`);
-  };
-
-  // 게시물 가져오기
-  const fetchPosts = async () => {
-    setLoading(true);
-    const postsData = await getPostsApi({ limit: limit.toString(), skip: skip.toString() });
-    const usersData = await getUsersApi({ limit: "0", select: "username,image" });
-
-    const postsWithUsers = postsData.posts.map((post: PostModel) => ({
-      ...post,
-      author: usersData.users.find((user: UserModel) => user.id === post.userId),
-    }));
-    setPosts(postsWithUsers);
-    setTotal(postsData.total);
-    setLoading(false);
-  };
-  // 태그별 게시물 가져오기
-  const fetchPostsByTag = async (tag?: string) => {
-    if (!tag || tag === "all") {
-      fetchPosts();
-      return;
-    }
-    setLoading(true);
-    const postsData = await getPostsByTagApi(tag);
-    const usersData = await getUsersApi({ limit: "0", select: "username,image" });
-    const postsWithUsers = postsData.posts.map((post) => ({
-      ...post,
-      author: usersData.users.find((user) => user.id === post.userId),
-    }));
-    setPosts(postsWithUsers);
-    setTotal(postsData.total);
-    setLoading(false);
-  };
 
   // 게시물 추가
   const addPost = async (postForm: PostFormData) => {
@@ -195,23 +149,23 @@ const PostsManager = () => {
     openModal((close) => <UserModal user={userData} onClose={close} />);
   };
 
-  useEffect(() => {
-    if (selectedTag) {
-      fetchPostsByTag(selectedTag);
-    } else {
-      fetchPosts();
-    }
-    updateURL();
-  }, [skip, limit, sortBy, sortOrder, selectedTag]);
+  const { loading, data: postsData } = usePostTableDataQuery({
+    skip,
+    limit,
+    sortBy,
+    sortOrder,
+    selectedTag,
+    searchQuery,
+  });
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    setSkip(parseInt(params.get("skip") || "0"));
-    setLimit(parseInt(params.get("limit") || "10"));
-    setSearchQuery(params.get("search") || "");
-    setSortBy(params.get("sortBy") || "");
-    setSortOrder(params.get("sortOrder") || "asc");
-    setSelectedTag(params.get("tag") || "");
+    // const params = new URLSearchParams(location.search);
+    setSkip(parseInt(urlQueryParams.get("skip") || "0"));
+    setLimit(parseInt(urlQueryParams.get("limit") || "10"));
+    // setSearchQuery(params.get("search") || "");
+    // setSortBy(params.get("sortBy") || "");
+    // setSortOrder(params.get("sortOrder") || "asc");
+    // setSelectedTag(params.get("tag") || "");
   }, [location.search]);
 
   return (
@@ -228,20 +182,17 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <PostsFilters skip={skip} limit={limit} />
+          <PostsFilters />
 
           {/* 게시물 테이블 */}
           {loading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
             <PostTable
-              posts={posts}
+              posts={postsData?.posts || []}
               searchQuery={searchQuery}
               selectedTag={selectedTag}
-              onClickTagAction={(_tag: string) => {
-                setSelectedTag(_tag);
-                updateURL();
-              }}
+              onClickTagAction={(_tag: string) => setSelectedTag(_tag)}
               onClickAuthorAction={(_user: UserModel) => openUserModal(_user)}
               onClickDetailAction={(_post: PostModel) => openPostDetail(_post)}
               onClickEditAction={(_post: PostModel) =>
@@ -252,7 +203,7 @@ const PostsManager = () => {
           )}
 
           {/* 페이지네이션 */}
-          <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={total} />
+          <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={postsData?.total || 0} />
         </div>
       </CardContent>
     </Card>
