@@ -6,7 +6,7 @@ import { PostFormData } from "../model/types";
 import { PostModel } from "../../../entities/post/model/types";
 interface PostEditModalProps extends BaseModalProps {
   onClose: () => void;
-  updatePost: (postForm: PostFormData) => void;
+  updatePost: (postId: number, postForm: PostFormData) => void;
   selectedPost: PostModel;
 }
 
@@ -33,7 +33,7 @@ export default function PostEditModal({ onClose, updatePost, selectedPost }: Pos
         />
         <Button
           onClick={() => {
-            updatePost(postForm);
+            updatePost(selectedPost.id, postForm);
             onClose();
           }}
         >

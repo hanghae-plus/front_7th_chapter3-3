@@ -30,6 +30,7 @@ import PostTable from "../features/post/ui/PostTable";
 import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
 import { getUserApi } from "../entities/user/api/user-api";
+import { addPostApi, deletePostApi, updatePostApi } from "../entities/post/api/post-api";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ const PostsManager = () => {
   const { openModal } = useModal();
 
   // 상태 관리
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<PostModel[]>([]);
   const [total, setTotal] = useState(0);
   const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"));
   const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"));
@@ -164,54 +165,24 @@ const PostsManager = () => {
 
   // 게시물 추가
   const addPost = async (postForm: PostFormData) => {
-    try {
-      const response = await fetch("/api/posts/add", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(postForm),
-      });
-      const data = await response.json();
-      setPosts([data, ...posts]);
-      // setShowAddDialog(false);
-      // setNewPost({ title: "", body: "", userId: 1 });
-    } catch (error) {
-      console.error("게시물 추가 오류:", error);
-    }
+    const postData = await addPostApi(postForm);
+    setPosts([postData, ...posts]);
   };
 
   // 게시물 업데이트
-  const updatePost = async (postForm: PostFormData) => {
-    try {
-      const response = await fetch(`/api/posts/${selectedPost.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...selectedPost,
-          ...postForm,
-        }),
-      });
-      const data = await response.json();
-      setPosts(posts.map((post) => (post.id === data.id ? data : post)));
-      // setShowEditDialog(false);
-    } catch (error) {
-      console.error("게시물 업데이트 오류:", error);
-    }
+  const updatePost = async (postId: number, postForm: PostFormData) => {
+    const postData = await updatePostApi(postId, postForm);
+    setPosts(posts.map((post) => (post.id === postData.id ? postData : post)));
   };
 
   // 게시물 삭제
-  const deletePost = async (id) => {
-    try {
-      await fetch(`/api/posts/${id}`, {
-        method: "DELETE",
-      });
-      setPosts(posts.filter((post) => post.id !== id));
-    } catch (error) {
-      console.error("게시물 삭제 오류:", error);
-    }
+  const deletePost = async (postId: number) => {
+    await deletePostApi(postId);
+    setPosts(posts.filter((post) => post.id !== postId));
   };
 
   // 댓글 가져오기
-  const fetchComments = async (postId) => {
+  const fetchComments = async (postId: number) => {
     if (comments[postId]) return; // 이미 불러온 댓글이 있으면 다시 불러오지 않음
     try {
       const response = await fetch(`/api/comments/post/${postId}`);
