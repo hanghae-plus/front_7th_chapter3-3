@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { Edit2, MessageSquare, Plus, Search, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import {
@@ -25,23 +25,16 @@ import {
   TableRow,
   Textarea,
 } from "../shared/components/ui"
+import { usePostList, usePostTags, usePostSearch, usePostByTag } from "../entities/posts/model"
+import { useCreatePostMutation, useUpdatePostMutation, useDeletePostMutation } from "../entities/posts/model/mutations"
 import {
-  fetchComments as fetchCommentsAPI,
-  createComment,
-  updateComment as updateCommentAPI,
-  deleteComment as deleteCommentAPI,
-  likeComment as likeCommentAPI,
-} from "../entities/comments/api"
-import {
-  fetchPosts as fetchPostsAPI,
-  fetchTags as fetchTagsAPI,
-  searchPosts as searchPostsAPI,
-  fetchPostsByTag as fetchPostsByTagAPI,
-  createPost as createPostAPI,
-  updatePost as updatePostAPI,
-  deletePost as deletePostAPI,
-} from "../entities/posts/api"
-import { fetchUsers as fetchUsersAPI, fetchUserById as fetchUserByIdAPI } from "../entities/users/api"
+  useCommentList,
+  useCreateCommentMutation,
+  useUpdateCommentMutation,
+  useDeleteCommentMutation,
+  useLikeCommentMutation,
+} from "../entities/comments/model"
+import { useUserList, useUserDetail } from "../entities/users/model"
 import { User } from "../entities/users/types"
 
 const PostsManager = () => {
@@ -49,29 +42,106 @@ const PostsManager = () => {
   const location = useLocation()
   const queryParams = new URLSearchParams(location.search)
 
-  // 상태 관리
-  const [posts, setPosts] = useState([])
-  const [total, setTotal] = useState(0)
+  // URL 파라미터 상태
   const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"))
   const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"))
   const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "")
-  const [selectedPost, setSelectedPost] = useState(null)
+  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
   const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "")
   const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc")
+
+  // UI 상태
+  const [selectedPost, setSelectedPost] = useState<any>(null)
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 })
-  const [loading, setLoading] = useState(false)
-  const [tags, setTags] = useState([])
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
-  const [comments, setComments] = useState({})
-  const [selectedComment, setSelectedComment] = useState(null)
-  const [newComment, setNewComment] = useState({ body: "", postId: null, userId: 1 })
+  const [selectedComment, setSelectedComment] = useState<any>(null)
+  const [newComment, setNewComment] = useState<{ body: string; postId: number | null; userId: number }>({
+    body: "",
+    postId: null,
+    userId: 1,
+  })
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false)
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedPostIdForComments, setSelectedPostIdForComments] = useState<number | null>(null)
+
+  // Queries
+  const { data: tagsData } = usePostTags()
+  const tags = tagsData || []
+
+  const { data: usersData } = useUserList("username,image")
+  const users = usersData?.users || []
+
+  // 조건부 쿼리: 검색, 태그, 일반 리스트
+  const shouldSearch = !!searchQuery.trim()
+  const shouldFilterByTag = !!selectedTag && selectedTag !== "all"
+
+  const { data: postsListData, isLoading: isLoadingPosts } = usePostList(limit, skip)
+  const { data: searchData, isLoading: isLoadingSearch } = usePostSearch(searchQuery)
+  const { data: tagData, isLoading: isLoadingTag } = usePostByTag(selectedTag)
+
+  // 현재 posts 데이터 결정
+  const currentPostsData = shouldSearch ? searchData : shouldFilterByTag ? tagData : postsListData
+  const isLoading =
+    (shouldSearch && isLoadingSearch) ||
+    (shouldFilterByTag && isLoadingTag) ||
+    (!shouldSearch && !shouldFilterByTag && isLoadingPosts)
+
+  // posts와 users 결합
+  const posts = useMemo(() => {
+    if (!currentPostsData?.posts) return []
+    return currentPostsData.posts.map((post: any) => ({
+      ...post,
+      author: users.find((user: any) => user.id === post.userId),
+    }))
+  }, [currentPostsData, users])
+
+  const total = currentPostsData?.total || 0
+
+  // 댓글 쿼리
+  const { data: commentsData } = useCommentList(selectedPostIdForComments || 0)
+  const comments = commentsData?.comments || []
+
+  // 사용자 상세 정보
+  const { data: userDetailData } = useUserDetail(selectedUser?.id || 0)
+
+  // Mutations
+  const createPostMutationHook = useCreatePostMutation({
+    onSuccess: () => {
+      setShowAddDialog(false)
+      setNewPost({ title: "", body: "", userId: 1 })
+    },
+  })
+
+  const updatePostMutationHook = useUpdatePostMutation({
+    onSuccess: () => {
+      setShowEditDialog(false)
+      setSelectedPost(null)
+    },
+  })
+
+  const deletePostMutationHook = useDeletePostMutation()
+
+  const createCommentMutation = useCreateCommentMutation(selectedPostIdForComments || 0, {
+    onSuccess: () => {
+      setShowAddCommentDialog(false)
+      setNewComment({ body: "", postId: null, userId: 1 })
+    },
+  })
+
+  const updateCommentMutation = useUpdateCommentMutation(selectedPostIdForComments || 0, {
+    onSuccess: () => {
+      setShowEditCommentDialog(false)
+      setSelectedComment(null)
+    },
+  })
+
+  const deleteCommentMutation = useDeleteCommentMutation(selectedPostIdForComments || 0)
+
+  const likeCommentMutation = useLikeCommentMutation(selectedPostIdForComments || 0)
 
   // URL 업데이트 함수
   const updateURL = () => {
@@ -85,217 +155,79 @@ const PostsManager = () => {
     navigate(`?${params.toString()}`)
   }
 
-  // 게시물 가져오기
-  const fetchPosts = async () => {
-    setLoading(true)
-    try {
-      const [postsData, usersData] = await Promise.all([fetchPostsAPI(limit, skip), fetchUsersAPI(0, "username,image")])
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }))
-      setPosts(postsWithUsers)
-      setTotal(postsData.total)
-    } catch (error) {
-      console.error("게시물 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 태그 가져오기
-  const fetchTags = async () => {
-    try {
-      const data = await fetchTagsAPI()
-      setTags(data)
-    } catch (error) {
-      console.error("태그 가져오기 오류:", error)
-    }
-  }
-
-  // 게시물 검색
-  const searchPosts = async () => {
-    if (!searchQuery) {
-      fetchPosts()
-      return
-    }
-    setLoading(true)
-    try {
-      const data = await searchPostsAPI(searchQuery)
-      setPosts(data.posts)
-      setTotal(data.total)
-    } catch (error) {
-      console.error("게시물 검색 오류:", error)
-    }
-    setLoading(false)
-  }
-
-  // 태그별 게시물 가져오기
-  const fetchPostsByTag = async (tag) => {
-    if (!tag || tag === "all") {
-      fetchPosts()
-      return
-    }
-    setLoading(true)
-    try {
-      const [postsData, usersData] = await Promise.all([fetchPostsByTagAPI(tag), fetchUsersAPI(0, "username,image")])
-
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }))
-
-      setPosts(postsWithUsers)
-      setTotal(postsData.total)
-    } catch (error) {
-      console.error("태그별 게시물 가져오기 오류:", error)
-    }
-    setLoading(false)
+  // 게시물 검색 핸들러
+  const handleSearch = () => {
+    updateURL()
   }
 
   // 게시물 추가
-  const addPost = async () => {
-    try {
-      const data = await createPostAPI(newPost)
-      setPosts([data, ...posts])
-      setShowAddDialog(false)
-      setNewPost({ title: "", body: "", userId: 1 })
-    } catch (error) {
-      console.error("게시물 추가 오류:", error)
-    }
+  const addPost = () => {
+    createPostMutationHook.mutate(newPost)
   }
 
   // 게시물 업데이트
-  const updatePost = async () => {
+  const updatePost = () => {
     if (!selectedPost) return
-    try {
-      const data = await updatePostAPI(selectedPost.id, selectedPost)
-      setPosts(posts.map((post) => (post.id === data.id ? data : post)))
-      setShowEditDialog(false)
-    } catch (error) {
-      console.error("게시물 업데이트 오류:", error)
-    }
+    updatePostMutationHook.mutate({ id: selectedPost.id, post: selectedPost })
   }
 
   // 게시물 삭제
-  const deletePost = async (id) => {
-    try {
-      await deletePostAPI(id)
-      setPosts(posts.filter((post) => post.id !== id))
-    } catch (error) {
-      console.error("게시물 삭제 오류:", error)
-    }
-  }
-
-  // 댓글 가져오기
-  const fetchComments = async (postId) => {
-    if (comments[postId]) return // 이미 불러온 댓글이 있으면 다시 불러오지 않음
-    try {
-      const data = await fetchCommentsAPI(postId)
-      setComments((prev) => ({ ...prev, [postId]: data.comments }))
-    } catch (error) {
-      console.error("댓글 가져오기 오류:", error)
-    }
+  const deletePost = (id: number) => {
+    deletePostMutationHook.mutate(id)
   }
 
   // 댓글 추가
-  const addComment = async () => {
+  const addComment = () => {
     if (!newComment.postId) return
-    try {
-      const data = await createComment({
-        body: newComment.body,
-        postId: newComment.postId,
-        userId: newComment.userId,
-      })
-      setComments((prev) => ({
-        ...prev,
-        [data.postId]: [...(prev[data.postId] || []), data],
-      }))
-      setShowAddCommentDialog(false)
-      setNewComment({ body: "", postId: null, userId: 1 })
-    } catch (error) {
-      console.error("댓글 추가 오류:", error)
-    }
+    createCommentMutation.mutate({
+      body: newComment.body,
+      postId: newComment.postId,
+      userId: newComment.userId,
+    })
   }
 
   // 댓글 업데이트
-  const updateComment = async () => {
+  const updateComment = () => {
     if (!selectedComment || !selectedComment.id) return
-    try {
-      const data = await updateCommentAPI(selectedComment.id, selectedComment.body)
-      const postId = data.postId || selectedComment.postId
-      if (postId) {
-        setComments((prev) => ({
-          ...prev,
-          [postId]: (prev[postId] || []).map((comment) => (comment.id === data.id ? data : comment)),
-        }))
-      }
-      setShowEditCommentDialog(false)
-      setSelectedComment(null)
-    } catch (error) {
-      console.error("댓글 업데이트 오류:", error)
-    }
+    updateCommentMutation.mutate({ id: selectedComment.id, body: selectedComment.body })
   }
 
   // 댓글 삭제
-  const deleteComment = async (id, postId) => {
-    try {
-      await deleteCommentAPI(id)
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].filter((comment) => comment.id !== id),
-      }))
-    } catch (error) {
-      console.error("댓글 삭제 오류:", error)
-    }
+  const deleteComment = (id: number) => {
+    deleteCommentMutation.mutate(id)
   }
 
   // 댓글 좋아요
-  const likeComment = async (id, postId) => {
-    try {
-      const comment = comments[postId]?.find((c) => c.id === id)
-      if (!comment) return
-      const newLikes = comment.likes + 1
-      const data = await likeCommentAPI(id, newLikes)
-      setComments((prev) => ({
-        ...prev,
-        [postId]: prev[postId].map((comment) => (comment.id === data.id ? { ...data, likes: newLikes } : comment)),
-      }))
-    } catch (error) {
-      console.error("댓글 좋아요 오류:", error)
-    }
+  const likeComment = (id: number) => {
+    const comment = comments.find((c: any) => c.id === id)
+    if (!comment) return
+    const newLikes = comment.likes + 1
+    likeCommentMutation.mutate({ id, likes: newLikes })
   }
 
   // 게시물 상세 보기
-  const openPostDetail = (post) => {
+  const openPostDetail = (post: any) => {
     setSelectedPost(post)
-    fetchComments(post.id)
+    setSelectedPostIdForComments(post.id)
     setShowPostDetailDialog(true)
   }
 
   // 사용자 모달 열기
-  const openUserModal = async (user) => {
-    try {
-      const userData = await fetchUserByIdAPI(user.id)
-      setSelectedUser(userData)
-      setShowUserModal(true)
-    } catch (error) {
-      console.error("사용자 정보 가져오기 오류:", error)
-    }
+  const openUserModal = (user: any) => {
+    setSelectedUser(user)
+    setShowUserModal(true)
   }
 
+  // 사용자 상세 정보 업데이트
   useEffect(() => {
-    fetchTags()
-  }, [])
+    if (userDetailData) {
+      setSelectedUser(userDetailData)
+    }
+  }, [userDetailData])
 
   useEffect(() => {
-    if (selectedTag) {
-      fetchPostsByTag(selectedTag)
-    } else {
-      fetchPosts()
-    }
     updateURL()
-  }, [skip, limit, sortBy, sortOrder, selectedTag])
+  }, [skip, limit, sortBy, sortOrder, selectedTag, searchQuery])
 
   useEffect(() => {
     const params = new URLSearchParams(location.search)
@@ -335,7 +267,7 @@ const PostsManager = () => {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {posts.map((post) => (
+        {posts.map((post: any) => (
           <TableRow key={post.id}>
             <TableCell>{post.id}</TableCell>
             <TableCell>
@@ -343,7 +275,7 @@ const PostsManager = () => {
                 <div>{highlightText(post.title, searchQuery)}</div>
 
                 <div className="flex flex-wrap gap-1">
-                  {post.tags?.map((tag) => (
+                  {post.tags?.map((tag: string) => (
                     <span
                       key={tag}
                       className={`px-1 text-[9px] font-semibold rounded-[4px] cursor-pointer ${
@@ -403,7 +335,7 @@ const PostsManager = () => {
   )
 
   // 댓글 렌더링
-  const renderComments = (postId) => (
+  const renderComments = (postId: number) => (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-sm font-semibold">댓글</h3>
@@ -419,14 +351,14 @@ const PostsManager = () => {
         </Button>
       </div>
       <div className="space-y-1">
-        {comments[postId]?.map((comment) => (
+        {comments.map((comment: any) => (
           <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
             <div className="flex items-center space-x-2 overflow-hidden">
               <span className="font-medium truncate">{comment.user.username}:</span>
               <span className="truncate">{highlightText(comment.body, searchQuery)}</span>
             </div>
             <div className="flex items-center space-x-1">
-              <Button variant="ghost" size="sm" onClick={() => likeComment(comment.id, postId)}>
+              <Button variant="ghost" size="sm" onClick={() => likeComment(comment.id)}>
                 <ThumbsUp className="w-3 h-3" />
                 <span className="ml-1 text-xs">{comment.likes}</span>
               </Button>
@@ -440,7 +372,7 @@ const PostsManager = () => {
               >
                 <Edit2 className="w-3 h-3" />
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id, postId)}>
+              <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id)}>
                 <Trash2 className="w-3 h-3" />
               </Button>
             </div>
@@ -473,7 +405,7 @@ const PostsManager = () => {
                   className="pl-8"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && searchPosts()}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 />
               </div>
             </div>
@@ -481,7 +413,6 @@ const PostsManager = () => {
               value={selectedTag}
               onValueChange={(value) => {
                 setSelectedTag(value)
-                fetchPostsByTag(value)
                 updateURL()
               }}
             >
@@ -490,7 +421,7 @@ const PostsManager = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">모든 태그</SelectItem>
-                {tags.map((tag) => (
+                {tags.map((tag: any) => (
                   <SelectItem key={tag.url} value={tag.slug}>
                     {tag.slug}
                   </SelectItem>
@@ -520,7 +451,7 @@ const PostsManager = () => {
           </div>
 
           {/* 게시물 테이블 */}
-          {loading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
+          {isLoading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
 
           {/* 페이지네이션 */}
           <div className="flex justify-between items-center">
@@ -656,27 +587,34 @@ const PostsManager = () => {
             <DialogTitle>사용자 정보</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <img src={selectedUser?.image} alt={selectedUser?.username} className="w-24 h-24 rounded-full mx-auto" />
-            <h3 className="text-xl font-semibold text-center">{selectedUser?.username}</h3>
+            <img
+              src={userDetailData?.image || selectedUser?.image}
+              alt={userDetailData?.username || selectedUser?.username}
+              className="w-24 h-24 rounded-full mx-auto"
+            />
+            <h3 className="text-xl font-semibold text-center">{userDetailData?.username || selectedUser?.username}</h3>
             <div className="space-y-2">
               <p>
-                <strong>이름:</strong> {selectedUser?.firstName} {selectedUser?.lastName}
+                <strong>이름:</strong> {userDetailData?.firstName || selectedUser?.firstName}{" "}
+                {userDetailData?.lastName || selectedUser?.lastName}
               </p>
               <p>
-                <strong>나이:</strong> {selectedUser?.age}
+                <strong>나이:</strong> {userDetailData?.age || selectedUser?.age}
               </p>
               <p>
-                <strong>이메일:</strong> {selectedUser?.email}
+                <strong>이메일:</strong> {userDetailData?.email || selectedUser?.email}
               </p>
               <p>
-                <strong>전화번호:</strong> {selectedUser?.phone}
+                <strong>전화번호:</strong> {userDetailData?.phone || selectedUser?.phone}
               </p>
               <p>
-                <strong>주소:</strong> {selectedUser?.address?.address}, {selectedUser?.address?.city},{" "}
-                {selectedUser?.address?.state}
+                <strong>주소:</strong> {userDetailData?.address?.address || selectedUser?.address?.address},{" "}
+                {userDetailData?.address?.city || selectedUser?.address?.city},{" "}
+                {userDetailData?.address?.state || selectedUser?.address?.state}
               </p>
               <p>
-                <strong>직장:</strong> {selectedUser?.company?.name} - {selectedUser?.company?.title}
+                <strong>직장:</strong> {userDetailData?.company?.name || selectedUser?.company?.name} -{" "}
+                {userDetailData?.company?.title || selectedUser?.company?.title}
               </p>
             </div>
           </div>
