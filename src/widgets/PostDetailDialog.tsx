@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui"
 import { Post } from "@/entities/post"
-import { Comment, fetchComments } from "@/entities/comment"
+import { commentQueries } from "@/entities/comment"
 import { CommentList } from "./CommentList"
 import { highlightText } from "@/shared/lib"
 
@@ -13,23 +13,13 @@ interface PostDetailDialogProps {
 }
 
 export const PostDetailDialog = ({ post, open, searchQuery, onOpenChange }: PostDetailDialogProps) => {
-  const [comments, setComments] = useState<Comment[]>([])
+  // TanStack Query로 댓글 조회 (post와 open 상태에 따라 조건부 실행)
+  const { data: commentsData } = useQuery({
+    ...commentQueries.listByPost(post?.id || 0),
+    enabled: !!post && open, // post가 있고 다이얼로그가 열렸을 때만 실행
+  })
 
-  useEffect(() => {
-    if (post && open) {
-      fetchComments(post.id)
-        .then((data) => setComments(data.comments))
-        .catch((error) => console.error("댓글 가져오기 오류:", error))
-    }
-  }, [post, open])
-
-  const handleCommentsUpdate = () => {
-    if (post) {
-      fetchComments(post.id)
-        .then((data) => setComments(data.comments))
-        .catch((error) => console.error("댓글 가져오기 오류:", error))
-    }
-  }
+  const comments = commentsData?.comments || []
 
   if (!post) return null
 
@@ -41,7 +31,7 @@ export const PostDetailDialog = ({ post, open, searchQuery, onOpenChange }: Post
         </DialogHeader>
         <div className="space-y-4">
           <p>{highlightText(post.body, searchQuery)}</p>
-          <CommentList postId={post.id} comments={comments} searchQuery={searchQuery} onUpdate={handleCommentsUpdate} />
+          <CommentList postId={post.id} comments={comments} searchQuery={searchQuery} />
         </div>
       </DialogContent>
     </Dialog>

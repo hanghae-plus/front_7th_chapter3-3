@@ -1,164 +1,140 @@
-import { useEffect, useState } from "react"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useMemo, useState } from "react"
+import { useSearchParams } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui"
-import { Post, fetchPosts, fetchPostsByTag, searchPosts } from "@/entities/post"
-import { fetchUsers } from "@/entities/user"
-import { Tag, fetchTags } from "@/entities/tag"
+import { Post, postQueries } from "@/entities/post"
+import { userQueries } from "@/entities/user"
+import { tagQueries } from "@/entities/tag"
 import { CreatePostDialog } from "@/features/create-post"
 import { ViewUserInfoDialog } from "@/features/view-user-info"
 import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/widgets/index"
 
 const PostsManagerPage = () => {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const queryParams = new URLSearchParams(location.search)
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // 상태 관리
-  const [posts, setPosts] = useState<Post[]>([])
-  const [total, setTotal] = useState(0)
-  const [skip, setSkip] = useState(parseInt(queryParams.get("skip") || "0"))
-  const [limit, setLimit] = useState(parseInt(queryParams.get("limit") || "10"))
-  const [searchQuery, setSearchQuery] = useState(queryParams.get("search") || "")
+  // URL 파라미터에서 상태 추출
+  const skip = parseInt(searchParams.get("skip") || "0")
+  const limit = parseInt(searchParams.get("limit") || "10")
+  const searchQuery = searchParams.get("search") || ""
+  const selectedTag = searchParams.get("tag") || ""
+  const sortBy = searchParams.get("sortBy") || ""
+  const sortOrder = searchParams.get("sortOrder") || "asc"
+
+  // UI 상태 (다이얼로그 관리)
   const [selectedPost, setSelectedPost] = useState<Post | null>(null)
-  const [sortBy, setSortBy] = useState(queryParams.get("sortBy") || "")
-  const [sortOrder, setSortOrder] = useState(queryParams.get("sortOrder") || "asc")
-  const [loading, setLoading] = useState(false)
-  const [tags, setTags] = useState<Tag[]>([])
-  const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "")
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
 
-  // URL 업데이트 함수
-  const updateURL = () => {
-    const params = new URLSearchParams()
-    if (skip) params.set("skip", skip.toString())
-    if (limit) params.set("limit", limit.toString())
-    if (searchQuery) params.set("search", searchQuery)
-    if (sortBy) params.set("sortBy", sortBy)
-    if (sortOrder) params.set("sortOrder", sortOrder)
-    if (selectedTag) params.set("tag", selectedTag)
-    navigate(`?${params.toString()}`)
+  // ===== TanStack Query로 데이터 패칭 =====
+
+  // 1. 태그 목록 조회
+  const { data: tags = [] } = useQuery(tagQueries.list())
+
+  // 2. 사용자 목록 조회 (author 정보용)
+  const { data: usersData } = useQuery(userQueries.list({ limit: 0, select: "username,image" }))
+
+  // 3. 게시물 조회 (검색어, 태그, 페이지네이션 고려)
+  // 검색어가 있을 때
+  const searchResult = useQuery({
+    ...postQueries.search(searchQuery),
+    enabled: !!searchQuery,
+  })
+
+  // 태그가 선택되었을 때
+  const tagResult = useQuery({
+    ...postQueries.listByTag(selectedTag),
+    enabled: !!selectedTag && !searchQuery,
+  })
+
+  // 기본 목록
+  const listResult = useQuery({
+    ...postQueries.list({ limit, skip }),
+    enabled: !searchQuery && !selectedTag,
+  })
+
+  // 활성화된 쿼리 결과 선택
+  const postsData = searchQuery ? searchResult.data : selectedTag ? tagResult.data : listResult.data
+  const isLoading = searchQuery ? searchResult.isLoading : selectedTag ? tagResult.isLoading : listResult.isLoading
+
+  // 게시물 + 사용자 정보 조합 (useMemo로 최적화)
+  const posts = useMemo(() => {
+    if (!postsData || !usersData) return []
+
+    return postsData.posts.map((post) => ({
+      ...post,
+      author: usersData.users.find((user) => user.id === post.userId),
+    }))
+  }, [postsData, usersData])
+
+  const total = postsData?.total || 0
+
+  // ===== URL 업데이트 함수 =====
+
+  const updateSearchParams = (updates: Record<string, string | number>) => {
+    const newParams = new URLSearchParams(searchParams)
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) {
+        newParams.set(key, String(value))
+      } else {
+        newParams.delete(key)
+      }
+    })
+
+    setSearchParams(newParams)
   }
 
-  // 게시물 가져오기
-  const loadPosts = async () => {
-    setLoading(true)
-    try {
-      const postsData = await fetchPosts({ limit, skip })
-      const usersData = await fetchUsers({ limit: 0, select: "username,image" })
+  // ===== 이벤트 핸들러 =====
 
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }))
-
-      setPosts(postsWithUsers)
-      setTotal(postsData.total)
-    } catch (error) {
-      console.error("게시물 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
+  const handleSearch = (query: string) => {
+    updateSearchParams({
+      search: query,
+      skip: 0, // 검색 시 첫 페이지로
+      tag: "", // 검색 시 태그 필터 제거
+    })
   }
 
-  // 태그별 게시물 가져오기
-  const loadPostsByTag = async (tag: string) => {
-    if (!tag || tag === "all") {
-      loadPosts()
-      return
-    }
-    setLoading(true)
-    try {
-      const [postsData, usersData] = await Promise.all([
-        fetchPostsByTag(tag),
-        fetchUsers({ limit: 0, select: "username,image" }),
-      ])
-
-      const postsWithUsers = postsData.posts.map((post) => ({
-        ...post,
-        author: usersData.users.find((user) => user.id === post.userId),
-      }))
-
-      setPosts(postsWithUsers)
-      setTotal(postsData.total)
-    } catch (error) {
-      console.error("태그별 게시물 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 게시물 검색
-  const handleSearch = async (query: string) => {
-    setSearchQuery(query)
-    if (!query) {
-      loadPosts()
-      return
-    }
-    setLoading(true)
-    try {
-      const data = await searchPosts(query)
-      setPosts(data.posts)
-      setTotal(data.total)
-    } catch (error) {
-      console.error("게시물 검색 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 태그 변경 핸들러
   const handleTagChange = (tag: string) => {
-    setSelectedTag(tag)
-    loadPostsByTag(tag)
-    updateURL()
+    updateSearchParams({
+      tag,
+      skip: 0, // 태그 변경 시 첫 페이지로
+      search: "", // 태그 선택 시 검색어 제거
+    })
   }
 
-  // 게시물 상세 보기
+  const handleSortByChange = (newSortBy: string) => {
+    updateSearchParams({ sortBy: newSortBy })
+  }
+
+  const handleSortOrderChange = (newSortOrder: string) => {
+    updateSearchParams({ sortOrder: newSortOrder })
+  }
+
+  const handleSkipChange = (newSkip: number) => {
+    updateSearchParams({ skip: newSkip })
+  }
+
+  const handleLimitChange = (newLimit: number) => {
+    updateSearchParams({ limit: newLimit, skip: 0 })
+  }
+
   const handlePostDetailClick = (post: Post) => {
     setSelectedPost(post)
     setShowPostDetailDialog(true)
   }
 
-  // 사용자 정보 보기
   const handleUserClick = (userId: number) => {
     setSelectedUserId(userId)
     setShowUserModal(true)
   }
-
-  // 초기 로드
-  useEffect(() => {
-    fetchTags()
-      .then(setTags)
-      .catch((error) => console.error("태그 가져오기 오류:", error))
-  }, [])
-
-  useEffect(() => {
-    if (selectedTag) {
-      loadPostsByTag(selectedTag)
-    } else {
-      loadPosts()
-    }
-    updateURL()
-  }, [skip, limit, sortBy, sortOrder])
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    setSkip(parseInt(params.get("skip") || "0"))
-    setLimit(parseInt(params.get("limit") || "10"))
-    setSearchQuery(params.get("search") || "")
-    setSortBy(params.get("sortBy") || "")
-    setSortOrder(params.get("sortOrder") || "asc")
-    setSelectedTag(params.get("tag") || "")
-  }, [location.search])
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>게시물 관리자</span>
-          <CreatePostDialog onSuccess={loadPosts} />
+          <CreatePostDialog onSuccess={() => {}} />
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -172,12 +148,12 @@ const PostsManagerPage = () => {
             tags={tags}
             onSearch={handleSearch}
             onTagChange={handleTagChange}
-            onSortByChange={setSortBy}
-            onSortOrderChange={setSortOrder}
+            onSortByChange={handleSortByChange}
+            onSortOrderChange={handleSortOrderChange}
           />
 
           {/* 게시물 테이블 */}
-          {loading ? (
+          {isLoading ? (
             <div className="flex justify-center p-4">로딩 중...</div>
           ) : (
             <PostsTable
@@ -187,12 +163,18 @@ const PostsManagerPage = () => {
               onTagClick={handleTagChange}
               onUserClick={handleUserClick}
               onPostDetailClick={handlePostDetailClick}
-              onPostsUpdate={loadPosts}
+              onPostsUpdate={() => {}}
             />
           )}
 
           {/* 페이지네이션 */}
-          <Pagination skip={skip} limit={limit} total={total} onSkipChange={setSkip} onLimitChange={setLimit} />
+          <Pagination
+            skip={skip}
+            limit={limit}
+            total={total}
+            onSkipChange={handleSkipChange}
+            onLimitChange={handleLimitChange}
+          />
         </div>
       </CardContent>
 

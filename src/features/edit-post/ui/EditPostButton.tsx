@@ -1,25 +1,33 @@
 import { useState } from "react"
 import { Edit2 } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "@/shared/ui"
-import { Post, updatePost } from "@/entities/post"
+import { Post, useUpdatePost } from "@/entities/post"
 
 interface EditPostButtonProps {
   post: Post
-  onSuccess: () => void
+  onSuccess?: () => void // optional로 변경
 }
 
 export const EditPostButton = ({ post, onSuccess }: EditPostButtonProps) => {
   const [open, setOpen] = useState(false)
   const [editedPost, setEditedPost] = useState(post)
 
-  const handleUpdate = async () => {
-    try {
-      await updatePost(post.id, editedPost)
-      setOpen(false)
-      onSuccess()
-    } catch (error) {
-      console.error("게시물 업데이트 오류:", error)
-    }
+  // TanStack Query Mutation 사용
+  const updatePost = useUpdatePost()
+
+  const handleUpdate = () => {
+    updatePost.mutate(
+      { id: post.id, post: editedPost },
+      {
+        onSuccess: () => {
+          setOpen(false)
+          onSuccess?.()
+        },
+        onError: (error) => {
+          console.error("게시물 업데이트 오류:", error)
+        },
+      },
+    )
   }
 
   return (
@@ -52,7 +60,9 @@ export const EditPostButton = ({ post, onSuccess }: EditPostButtonProps) => {
               value={editedPost?.body || ""}
               onChange={(e) => setEditedPost({ ...editedPost, body: e.target.value })}
             />
-            <Button onClick={handleUpdate}>게시물 업데이트</Button>
+            <Button onClick={handleUpdate} disabled={updatePost.isPending}>
+              {updatePost.isPending ? "업데이트 중..." : "게시물 업데이트"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,25 +1,30 @@
 import { useState } from "react"
 import { Plus } from "lucide-react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Input, Textarea } from "@/shared/ui"
-import { createPost } from "@/entities/post"
+import { useCreatePost } from "@/entities/post"
 
 interface CreatePostDialogProps {
-  onSuccess: () => void
+  onSuccess?: () => void // optional로 변경 (TanStack Query 사용 시 불필요)
 }
 
 export const CreatePostDialog = ({ onSuccess }: CreatePostDialogProps) => {
   const [open, setOpen] = useState(false)
   const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 })
 
-  const handleCreate = async () => {
-    try {
-      await createPost(newPost)
-      setNewPost({ title: "", body: "", userId: 1 })
-      setOpen(false)
-      onSuccess()
-    } catch (error) {
-      console.error("게시물 추가 오류:", error)
-    }
+  // TanStack Query Mutation 사용
+  const createPost = useCreatePost()
+
+  const handleCreate = () => {
+    createPost.mutate(newPost, {
+      onSuccess: () => {
+        setNewPost({ title: "", body: "", userId: 1 })
+        setOpen(false)
+        onSuccess?.() // 선택적 콜백 실행
+      },
+      onError: (error) => {
+        console.error("게시물 추가 오류:", error)
+      },
+    })
   }
 
   return (
@@ -52,7 +57,9 @@ export const CreatePostDialog = ({ onSuccess }: CreatePostDialogProps) => {
               value={newPost.userId}
               onChange={(e) => setNewPost({ ...newPost, userId: Number(e.target.value) })}
             />
-            <Button onClick={handleCreate}>게시물 추가</Button>
+            <Button onClick={handleCreate} disabled={createPost.isPending}>
+              {createPost.isPending ? "추가 중..." : "게시물 추가"}
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

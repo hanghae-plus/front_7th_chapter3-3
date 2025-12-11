@@ -9,10 +9,10 @@ interface CommentListProps {
   postId: number
   comments: Comment[]
   searchQuery: string
-  onUpdate: () => void
+  onUpdate?: () => void // optional로 변경 (TanStack Query 사용 시 불필요)
 }
 
-export const CommentList = ({ postId, comments, searchQuery, onUpdate }: CommentListProps) => {
+export const CommentList = ({ postId, comments, searchQuery, onUpdate = () => {} }: CommentListProps) => {
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">
