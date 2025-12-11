@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Edit2, MessageSquare, Plus, Search, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   Button,
@@ -13,12 +13,6 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from "../components";
 import { useModal } from "../shared/modal/ModalContext";
 import UserModal from "../features/user/ui/UserModal";
@@ -26,12 +20,15 @@ import PostCreateModal from "../features/post/ui/PostCreateModal";
 import PostEditModal from "../features/post/ui/PostEditModal";
 import PostDetailModal from "../features/post/ui/PostDetailModal";
 import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
-import { highlightText } from "../shared/utils/highlight";
 import { PostFormData } from "../features/post/model/types";
 import { PostModel } from "../entities/post/model/types";
 import { CommentFormData } from "../features/comment/model/types";
 import CommentEditModal from "../features/comment/ui/CommentEditModal";
 import Pagination from "../shared/ui/Pagination";
+import { UserModel } from "../entities/user/model/types";
+import PostTable from "../features/post/ui/PostTable";
+import CommentList from "../features/comment/ui/CommentList";
+import { CommentModel } from "../entities/comment/model/types";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -56,8 +53,8 @@ const PostsManager = () => {
   const [loading, setLoading] = useState(false);
   const [tags, setTags] = useState([]);
   const [selectedTag, setSelectedTag] = useState(queryParams.get("tag") || "");
-  const [comments, setComments] = useState({});
-  const [selectedComment, setSelectedComment] = useState(null);
+  const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
+  const [selectedComment, setSelectedComment] = useState<CommentModel | null>(null);
   // const [newComment, setNewComment] = useState({ body: "", postId: null, userId: 1 });
   // const [showAddCommentDialog, setShowAddCommentDialog] = useState(false);
   // const [showEditCommentDialog, setShowEditCommentDialog] = useState(false);
@@ -245,12 +242,12 @@ const PostsManager = () => {
   };
 
   // 댓글 업데이트
-  const updateComment = async () => {
+  const updateComment = async (commentForm: CommentFormData) => {
     try {
       const response = await fetch(`/api/comments/${selectedComment.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ body: selectedComment.body }),
+        body: JSON.stringify({ body: commentForm.body }),
       });
       const data = await response.json();
       setComments((prev) => ({
@@ -299,12 +296,33 @@ const PostsManager = () => {
   };
 
   // 게시물 상세 보기
-  const openPostDetail = (post) => {
+  const openPostDetail = (post: PostModel) => {
     setSelectedPost(post);
     fetchComments(post.id);
     // setShowPostDetailDialog(true);
     openModal((close) => (
-      <PostDetailModal onClose={close} post={post} searchQuery={searchQuery} comment={renderComments(post.id)} />
+      <PostDetailModal
+        onClose={close}
+        post={post}
+        searchQuery={searchQuery}
+        comment={
+          <CommentList
+            comments={comments?.[post.id] || []}
+            searchQuery={searchQuery}
+            onClickLikeAction={(comment) => likeComment(comment.id, post.id)}
+            onClickEditAction={(comment) => {
+              setSelectedComment(comment);
+              openModal((close) => (
+                <CommentEditModal onClose={close} updateComment={updateComment} selectedComment={comment} />
+              ));
+            }}
+            onClickDeleteAction={(comment) => deleteComment(comment.id, post.id)}
+            onClickAddAction={() => {
+              openModal((close) => <CommentCreateModal onClose={close} addComment={addComment} postId={post.id} />);
+            }}
+          />
+        }
+      />
     ));
   };
 
@@ -359,135 +377,135 @@ const PostsManager = () => {
   // };
 
   // 게시물 테이블 렌더링
-  const renderPostTable = () => (
-    <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[50px]">ID</TableHead>
-          <TableHead>제목</TableHead>
-          <TableHead className="w-[150px]">작성자</TableHead>
-          <TableHead className="w-[150px]">반응</TableHead>
-          <TableHead className="w-[150px]">작업</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {posts.map((post) => (
-          <TableRow key={post.id}>
-            <TableCell>{post.id}</TableCell>
-            <TableCell>
-              <div className="space-y-1">
-                <div>{highlightText(post.title, searchQuery)}</div>
+  // const renderPostTable = () => (
+  //   <Table>
+  //     <TableHeader>
+  //       <TableRow>
+  //         <TableHead className="w-[50px]">ID</TableHead>
+  //         <TableHead>제목</TableHead>
+  //         <TableHead className="w-[150px]">작성자</TableHead>
+  //         <TableHead className="w-[150px]">반응</TableHead>
+  //         <TableHead className="w-[150px]">작업</TableHead>
+  //       </TableRow>
+  //     </TableHeader>
+  //     <TableBody>
+  //       {posts.map((post) => (
+  //         <TableRow key={post.id}>
+  //           <TableCell>{post.id}</TableCell>
+  //           <TableCell>
+  //             <div className="space-y-1">
+  //               <div>{highlightText(post.title, searchQuery)}</div>
 
-                <div className="flex flex-wrap gap-1">
-                  {post.tags?.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`px-1 text-[9px] font-semibold rounded-[4px] cursor-pointer ${
-                        selectedTag === tag
-                          ? "text-white bg-blue-500 hover:bg-blue-600"
-                          : "text-blue-800 bg-blue-100 hover:bg-blue-200"
-                      }`}
-                      onClick={() => {
-                        setSelectedTag(tag);
-                        updateURL();
-                      }}
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center space-x-2 cursor-pointer" onClick={() => openUserModal(post.author)}>
-                <img src={post.author?.image} alt={post.author?.username} className="w-8 h-8 rounded-full" />
-                <span>{post.author?.username}</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <ThumbsUp className="w-4 h-4" />
-                <span>{post.reactions?.likes || 0}</span>
-                <ThumbsDown className="w-4 h-4" />
-                <span>{post.reactions?.dislikes || 0}</span>
-              </div>
-            </TableCell>
-            <TableCell>
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
-                  <MessageSquare className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    openModal((close) => <PostEditModal onClose={close} selectedPost={post} updatePost={updatePost} />);
-                  }}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-            </TableCell>
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
+  //               <div className="flex flex-wrap gap-1">
+  //                 {post.tags?.map((tag) => (
+  //                   <span
+  //                     key={tag}
+  //                     className={`px-1 text-[9px] font-semibold rounded-[4px] cursor-pointer ${
+  //                       selectedTag === tag
+  //                         ? "text-white bg-blue-500 hover:bg-blue-600"
+  //                         : "text-blue-800 bg-blue-100 hover:bg-blue-200"
+  //                     }`}
+  //                     onClick={() => {
+  //                       setSelectedTag(tag);
+  //                       updateURL();
+  //                     }}
+  //                   >
+  //                     {tag}
+  //                   </span>
+  //                 ))}
+  //               </div>
+  //             </div>
+  //           </TableCell>
+  //           <TableCell>
+  //             <div className="flex items-center space-x-2 cursor-pointer" onClick={() => openUserModal(post.author)}>
+  //               <img src={post.author?.image} alt={post.author?.username} className="w-8 h-8 rounded-full" />
+  //               <span>{post.author?.username}</span>
+  //             </div>
+  //           </TableCell>
+  //           <TableCell>
+  //             <div className="flex items-center gap-2">
+  //               <ThumbsUp className="w-4 h-4" />
+  //               <span>{post.reactions?.likes || 0}</span>
+  //               <ThumbsDown className="w-4 h-4" />
+  //               <span>{post.reactions?.dislikes || 0}</span>
+  //             </div>
+  //           </TableCell>
+  //           <TableCell>
+  //             <div className="flex items-center gap-2">
+  //               <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
+  //                 <MessageSquare className="w-4 h-4" />
+  //               </Button>
+  //               <Button
+  //                 variant="ghost"
+  //                 size="sm"
+  //                 onClick={() => {
+  //                   openModal((close) => <PostEditModal onClose={close} selectedPost={post} updatePost={updatePost} />);
+  //                 }}
+  //               >
+  //                 <Edit2 className="w-4 h-4" />
+  //               </Button>
+  //               <Button variant="ghost" size="sm" onClick={() => deletePost(post.id)}>
+  //                 <Trash2 className="w-4 h-4" />
+  //               </Button>
+  //             </div>
+  //           </TableCell>
+  //         </TableRow>
+  //       ))}
+  //     </TableBody>
+  //   </Table>
+  // );
 
   // 댓글 렌더링
-  const renderComments = (postId) => (
-    <div className="mt-2">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold">댓글</h3>
-        <Button
-          size="sm"
-          onClick={() => {
-            openModal((close) => <CommentCreateModal onClose={close} addComment={addComment} postId={postId} />);
-            // setNewComment((prev) => ({ ...prev, postId }));
-            // setShowAddCommentDialog(true);
-          }}
-        >
-          <Plus className="w-3 h-3 mr-1" />
-          댓글 추가
-        </Button>
-      </div>
-      <div className="space-y-1">
-        {comments[postId]?.map((comment) => (
-          <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
-            <div className="flex items-center space-x-2 overflow-hidden">
-              <span className="font-medium truncate">{comment.user.username}:</span>
-              <span className="truncate">{highlightText(comment.body, searchQuery)}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Button variant="ghost" size="sm" onClick={() => likeComment(comment.id, postId)}>
-                <ThumbsUp className="w-3 h-3" />
-                <span className="ml-1 text-xs">{comment.likes}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  // setSelectedComment(comment);
-                  // setShowEditCommentDialog(true);
-                  openModal((close) => (
-                    <CommentEditModal onClose={close} updateComment={updateComment} selectedComment={comment} />
-                  ));
-                }}
-              >
-                <Edit2 className="w-3 h-3" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id, postId)}>
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  // const renderComments = (postId) => (
+  //   <div className="mt-2">
+  //     <div className="flex items-center justify-between mb-2">
+  //       <h3 className="text-sm font-semibold">댓글</h3>
+  //       <Button
+  //         size="sm"
+  //         onClick={() => {
+  //           openModal((close) => <CommentCreateModal onClose={close} addComment={addComment} postId={postId} />);
+  //           // setNewComment((prev) => ({ ...prev, postId }));
+  //           // setShowAddCommentDialog(true);
+  //         }}
+  //       >
+  //         <Plus className="w-3 h-3 mr-1" />
+  //         댓글 추가
+  //       </Button>
+  //     </div>
+  //     <div className="space-y-1">
+  //       {comments[postId]?.map((comment) => (
+  //         <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
+  //           <div className="flex items-center space-x-2 overflow-hidden">
+  //             <span className="font-medium truncate">{comment.user.username}:</span>
+  //             <span className="truncate">{highlightText(comment.body, searchQuery)}</span>
+  //           </div>
+  //           <div className="flex items-center space-x-1">
+  //             <Button variant="ghost" size="sm" onClick={() => likeComment(comment.id, postId)}>
+  //               <ThumbsUp className="w-3 h-3" />
+  //               <span className="ml-1 text-xs">{comment.likes}</span>
+  //             </Button>
+  //             <Button
+  //               variant="ghost"
+  //               size="sm"
+  //               onClick={() => {
+  //                 setSelectedComment(comment);
+  //                 // setShowEditCommentDialog(true);
+  //                 openModal((close) => (
+  //                   <CommentEditModal onClose={close} updateComment={updateComment} selectedComment={comment} />
+  //                 ));
+  //               }}
+  //             >
+  //               <Edit2 className="w-3 h-3" />
+  //             </Button>
+  //             <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id, postId)}>
+  //               <Trash2 className="w-3 h-3" />
+  //             </Button>
+  //           </div>
+  //         </div>
+  //       ))}
+  //     </div>
+  //   </div>
+  // );
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
@@ -559,7 +577,25 @@ const PostsManager = () => {
           </div>
 
           {/* 게시물 테이블 */}
-          {loading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
+          {loading ? (
+            <div className="flex justify-center p-4">로딩 중...</div>
+          ) : (
+            <PostTable
+              posts={posts}
+              searchQuery={searchQuery}
+              selectedTag={selectedTag}
+              onClickTagAction={(_tag: string) => {
+                setSelectedTag(_tag);
+                updateURL();
+              }}
+              onClickAuthorAction={(_user: UserModel) => openUserModal(_user)}
+              onClickDetailAction={(_post: PostModel) => openPostDetail(_post)}
+              onClickEditAction={(_post: PostModel) =>
+                openModal((close) => <PostEditModal onClose={close} selectedPost={_post} updatePost={updatePost} />)
+              }
+              onClickDeleteAction={(_post: PostModel) => deletePost(_post.id)}
+            />
+          )}
 
           {/* 페이지네이션 */}
           <Pagination limit={limit} setLimit={setLimit} skip={skip} setSkip={setSkip} total={total} />
