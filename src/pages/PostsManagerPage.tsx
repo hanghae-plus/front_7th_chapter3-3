@@ -29,6 +29,7 @@ import { UserModel } from "../entities/user/model/types";
 import PostTable from "../features/post/ui/PostTable";
 import CommentList from "../features/comment/ui/CommentList";
 import { CommentModel } from "../entities/comment/model/types";
+import { getUserApi } from "../entities/user/api/user-api";
 
 const PostsManager = () => {
   const navigate = useNavigate();
@@ -327,15 +328,10 @@ const PostsManager = () => {
   };
 
   // 사용자 모달 열기
-  const openUserModal = async (user) => {
-    try {
-      const response = await fetch(`/api/users/${user.id}`);
-      const userData = await response.json();
-      setSelectedUser(userData);
-      openModal((close) => <UserModal user={userData} onClose={close} />);
-    } catch (error) {
-      console.error("사용자 정보 가져오기 오류:", error);
-    }
+  const openUserModal = async (user: UserModel) => {
+    const userData = await getUserApi(user.id);
+    setSelectedUser(userData);
+    openModal((close) => <UserModal user={userData} onClose={close} />);
   };
 
   useEffect(() => {
