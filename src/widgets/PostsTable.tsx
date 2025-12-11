@@ -4,9 +4,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Post } from "@/entities/post"
 import { PostReactions, PostTags } from "@/entities/post"
 import { UserAvatar, userQueries } from "@/entities/user"
-import { EditPostButton } from "@/features/edit-post"
-import { DeletePostButton } from "@/features/delete-post"
-import { ViewPostDetailButton } from "@/features/view-post-detail"
+import { EditPostButton } from "@/features/post/edit-post"
+import { DeletePostButton } from "@/features/post/delete-post"
+import { ViewPostDetailButton } from "@/features/post/view-post-detail"
 import { highlightText } from "@/shared/lib"
 
 interface PostsTableProps {

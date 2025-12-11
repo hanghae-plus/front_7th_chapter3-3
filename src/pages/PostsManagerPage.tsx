@@ -3,8 +3,8 @@ import { useSearchParams } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui"
 import { Post, postQueries } from "@/entities/post"
-import { CreatePostDialog } from "@/features/create-post"
-import { ViewUserInfoDialog } from "@/features/view-user-info"
+import { CreatePostDialog } from "@/features/post/create-post"
+import { ViewUserInfoDialog } from "@/features/user/view-user-info"
 import { PostsFilterPanel, PostsTable, PostDetailDialog, Pagination } from "@/widgets/index"
 
 const PostsManagerPage = () => {

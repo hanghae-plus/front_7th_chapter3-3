@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import { SearchBar } from "@/features/search-posts"
-import { TagFilter } from "@/features/filter-by-tag"
-import { SortControls } from "@/features/sort-posts"
+import { SearchBar } from "@/features/post/search-posts"
+import { TagFilter } from "@/features/tag/filter-by-tag"
+import { SortControls } from "@/features/post/sort-posts"
 import { tagQueries } from "@/entities/tag"
 
 interface PostsFilterPanelProps {

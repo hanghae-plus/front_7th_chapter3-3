@@ -1,8 +1,8 @@
 import { Comment } from "@/entities/comment"
-import { CreateCommentDialog } from "@/features/create-comment"
-import { EditCommentButton } from "@/features/edit-comment"
-import { DeleteCommentButton } from "@/features/delete-comment"
-import { LikeCommentButton } from "@/features/like-comment"
+import { CreateCommentDialog } from "@/features/comment/create-comment"
+import { EditCommentButton } from "@/features/comment/edit-comment"
+import { DeleteCommentButton } from "@/features/comment/delete-comment"
+import { LikeCommentButton } from "@/features/comment/like-comment"
 import { highlightText } from "@/shared/lib"
 
 interface CommentListProps {
