@@ -1,10 +1,10 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import ReactDOM from "react-dom/client"
+import App from "./app/routers/App" // 경로 주의
+import { QueryProvider } from "./app/providers/QueryProvider"
+import "./app/styles/index.css"
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
+ReactDOM.createRoot(document.getElementById("root")!).render(
+  <QueryProvider>
     <App />
-  </StrictMode>,
+  </QueryProvider>,
 )
