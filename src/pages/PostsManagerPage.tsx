@@ -5,7 +5,19 @@ import { Post } from "@/entities/post/model/post"
 import { User, UserDetail } from "@/entities/user/model/user"
 import { Comment } from "@/entities/comment/model/comment"
 
-import { Button, Card, CardContent, CardHeader, CardTitle, Input } from "../shared"
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared"
 import { useTags } from "@/entities/tag/model/tag-queries"
 import { PostTable } from "@/entities/post/ui"
 import { useUpdateURL } from "@/shared/lib/url"
@@ -19,7 +31,53 @@ import { useCommentMutations } from "@/entities/comment/model"
 import { fetchUserDetail } from "@/entities/user/api/fetch-user-detail"
 import { UserModal } from "@/entities/user/ui"
 
-const PostsManager = () => {
+// Pagination 컴포넌트
+interface PaginationProps {
+  skip: number
+  limit: number
+  total: number
+  onSkipChange: (skip: number) => void
+  onLimitChange: (limit: number) => void
+}
+
+const Pagination = ({ skip, limit, total, onSkipChange, onLimitChange }: PaginationProps) => {
+  const handlePrevious = () => {
+    onSkipChange(Math.max(0, skip - limit))
+  }
+
+  const handleNext = () => {
+    onSkipChange(skip + limit)
+  }
+
+  return (
+    <div className="flex justify-between items-center">
+      <div className="flex items-center gap-2">
+        <span>표시</span>
+        <Select value={limit.toString()} onValueChange={(value) => onLimitChange(Number(value))}>
+          <SelectTrigger>
+            <SelectValue placeholder="10" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="10">10</SelectItem>
+            <SelectItem value="20">20</SelectItem>
+            <SelectItem value="30">30</SelectItem>
+          </SelectContent>
+        </Select>
+        <span>항목</span>
+      </div>
+      <div className="flex gap-2">
+        <Button disabled={skip === 0} onClick={handlePrevious}>
+          이전
+        </Button>
+        <Button disabled={skip + limit >= total} onClick={handleNext}>
+          다음
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+const PostsManagePage = () => {
   // URL 관리
   const updateURL = useUpdateURL()
   const location = useLocation()
@@ -258,30 +316,7 @@ const PostsManager = () => {
           )}
 
           {/* 페이지네이션 */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span>표시</span>
-              <SelectBox
-                value={limit.toString()}
-                placeholder="10"
-                options={[
-                  { value: "10", label: "10" },
-                  { value: "20", label: "20" },
-                  { value: "30", label: "30" },
-                ]}
-                onValueChange={(value) => setLimit(Number(value))}
-              />
-              <span>항목</span>
-            </div>
-            <div className="flex gap-2">
-              <Button disabled={skip === 0} onClick={() => setSkip(Math.max(0, skip - limit))}>
-                이전
-              </Button>
-              <Button disabled={skip + limit >= total} onClick={() => setSkip(skip + limit)}>
-                다음
-              </Button>
-            </div>
-          </div>
+          <Pagination skip={skip} limit={limit} total={total} onSkipChange={setSkip} onLimitChange={setLimit} />
         </div>
       </CardContent>
 
@@ -334,4 +369,4 @@ const PostsManager = () => {
   )
 }
 
-export default PostsManager
+export default PostsManagePage
