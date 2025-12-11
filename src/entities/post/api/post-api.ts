@@ -1,4 +1,4 @@
-import { PostModel } from "../model/types";
+import { PostModel, PostTagModel } from "../model/types";
 import { AddPostDto, PostGetQueryParams, PostListApiResponse, UpdatePostDto } from "./dto";
 
 export const addPostApi = async (postDto: AddPostDto): Promise<PostModel> => {
@@ -75,7 +75,7 @@ export const getPostsByTagApi = async (tag: string): Promise<PostListApiResponse
   }
 };
 
-export const getPostTagsApi = async (): Promise<string[]> => {
+export const getPostTagsApi = async (): Promise<PostTagModel[]> => {
   try {
     const response = await fetch("/api/posts/tags");
     const data = await response.json();

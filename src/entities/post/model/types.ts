@@ -10,3 +10,9 @@ export interface PostModel {
   views: number;
   userId: number;
 }
+
+export interface PostTagModel {
+  slug: string;
+  url: string;
+  name: string;
+}

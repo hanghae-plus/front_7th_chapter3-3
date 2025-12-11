@@ -3,9 +3,15 @@ import { getPostsApi } from "../api/post-api";
 import { useQuery } from "@tanstack/react-query";
 import { PostGetQueryParams } from "../api/dto";
 
-export function usePostsQuery(params: PostGetQueryParams) {
+interface UsePostsQueryProps {
+  params?: PostGetQueryParams;
+  enabled?: boolean;
+}
+
+export function usePostsQuery({ params = {}, enabled = true }: UsePostsQueryProps) {
   return useQuery({
     queryKey: postsKeys.list(params),
     queryFn: () => getPostsApi(params),
+    enabled,
   });
 }
