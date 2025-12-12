@@ -1,5 +1,5 @@
 import { PostsUrlQueryParams } from "./types";
-import { DEFAULT_PAGINATION_SKIP, DEFAULT_PAGINATION_LIMIT } from "./constants";
+import { DEFAULT_PAGINATION_SKIP, DEFAULT_PAGINATION_LIMIT } from "../../../shared/types";
 
 export function parsePostsUrlQueryParams(searchParams: URLSearchParams): PostsUrlQueryParams {
   const skipRaw = searchParams.get("skip");

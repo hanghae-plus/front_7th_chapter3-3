@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, Pagination } from "../../../shared/ui";
 import { useModal } from "../../../shared/modal/ModalContext";
-import { PostCreateModal, PostTable, usePostTableDataQuery } from "../../../features/post";
+import { PostCreateModal, PostTable } from "../../../features/post";
 import { PostsFilters } from "../../../features/post-filter";
-import { usePostsUrlQuery } from "../../../shared/url-query";
+import { UserModal } from "../../../features/user";
+import { CommentList } from "../../../features/comment";
+import { usePostsUrlQuery } from "../model";
+import { usePostTableDataQuery } from "../hooks/use-post-table-data-query";
 
 const PostsManager = () => {
   const { queryParams, setQueryParams } = usePostsUrlQuery();
@@ -16,14 +19,33 @@ const PostsManager = () => {
   const [skip, setSkip] = useState(queryParams.skip || 0);
   const [limit, setLimit] = useState(queryParams.limit || 10);
 
+  const pagination = { skip, limit };
+  const filter = {
+    sortBy: queryParams.sortBy,
+    sortOrder: queryParams.sortOrder,
+    tag: queryParams.tag,
+    search: queryParams.search,
+  };
+
   // Data Query
   const { loading, data: postsData } = usePostTableDataQuery({
-    urlQueryParams: queryParams,
+    pagination,
+    filter,
   });
 
   useEffect(() => {
     setQueryParams({ limit, skip });
   }, [limit, skip]);
+
+  const handleUserClick = (userId?: number) => {
+    if (userId) {
+      openModal((close) => <UserModal userId={userId} onClose={close} />);
+    }
+  };
+
+  const renderComments = (postId: number) => {
+    return <CommentList postId={postId} searchQuery={queryParams.search || ""} />;
+  };
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
@@ -39,7 +61,7 @@ const PostsManager = () => {
       <CardContent>
         <div className="flex flex-col gap-4">
           {/* 검색 및 필터 컨트롤 */}
-          <PostsFilters />
+          <PostsFilters filter={filter} onFilterChange={(f) => setQueryParams({ ...f })} />
 
           {/* 게시물 테이블 */}
           {loading ? (
@@ -50,6 +72,8 @@ const PostsManager = () => {
               searchQuery={queryParams.search || ""}
               selectedTag={queryParams.tag || ""}
               onTagClick={(tag) => setQueryParams({ tag, search: null, sortBy: null, sortOrder: null })}
+              onUserClick={handleUserClick}
+              renderComments={renderComments}
             />
           )}
 

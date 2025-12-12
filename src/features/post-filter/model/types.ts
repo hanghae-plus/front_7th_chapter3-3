@@ -1,6 +1,4 @@
-export type PostsUrlQueryParams = {
-  skip: number | null;
-  limit: number | null;
+export type PostFilterParams = {
   sortBy: string | null;
   sortOrder: "asc" | "desc" | null;
   tag: string | null;

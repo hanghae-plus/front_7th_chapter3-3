@@ -5,20 +5,18 @@ import {
   usePostsWithTagQuery,
 } from "../../../entities/post";
 import { UserListApiResponse, useUsersQuery } from "../../../entities/user";
-import {
-  mapPostsUrlQueryParamsToApiParams,
-  mapPostsUrlQueryParamsToApiSearchParams,
-  mapPostsUrlQueryParamsToApiTagParams,
-} from "../lib/mappers";
-import { PostsUrlQueryParams } from "../../../shared/url-query";
-import { PostTableListData } from "../model/types";
+import { mapToPostsApiParams, mapToPostsSearchApiParams, mapToPostsTagApiParams } from "../lib/mappers";
+import { PaginationParams } from "../../../shared/types";
+import { PostFilterParams } from "../../../features/post-filter";
+import { PostTableListData } from "../../../features/post";
 
 interface UsePostTableDataQueryProps {
-  urlQueryParams: PostsUrlQueryParams;
+  pagination: PaginationParams;
+  filter: PostFilterParams;
 }
 
-export function usePostTableDataQuery({ urlQueryParams }: UsePostTableDataQueryProps) {
-  const { tag, search, sortBy, sortOrder, ...baseQueryParams } = urlQueryParams;
+export function usePostTableDataQuery({ pagination, filter }: UsePostTableDataQueryProps) {
+  const { tag, search } = filter;
 
   const postsWithTagEnabled = !!tag && tag !== "all";
   const postsWithSearchEnabled = !!search;
@@ -36,29 +34,9 @@ export function usePostTableDataQuery({ urlQueryParams }: UsePostTableDataQueryP
     };
   };
 
-  const apiBaseParams = mapPostsUrlQueryParamsToApiParams({
-    ...baseQueryParams,
-    sortBy: sortBy ?? null,
-    sortOrder: sortOrder ?? null,
-    tag: null,
-    search: null,
-  });
-
-  const apiSearchParams = mapPostsUrlQueryParamsToApiSearchParams({
-    ...baseQueryParams,
-    search: search ?? null,
-    sortBy: null,
-    sortOrder: null,
-    tag: null,
-  });
-
-  const apiTagParams = mapPostsUrlQueryParamsToApiTagParams({
-    ...baseQueryParams,
-    tag: tag ?? null,
-    sortBy: null,
-    sortOrder: null,
-    search: null,
-  });
+  const apiBaseParams = mapToPostsApiParams({ pagination, filter });
+  const apiSearchParams = mapToPostsSearchApiParams({ pagination, filter });
+  const apiTagParams = mapToPostsTagApiParams({ pagination });
 
   const { data: usersData, isFetching: isFetchingUsers } = useUsersQuery({
     params: { limit: "0", select: "username,image" },

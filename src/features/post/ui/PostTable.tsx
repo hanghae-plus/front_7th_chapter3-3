@@ -3,10 +3,8 @@ import { ThumbsUp, ThumbsDown, MessageSquare, Edit2, Trash2 } from "lucide-react
 import { PostModel, usePostDeleteMutate } from "../../../entities/post";
 import { highlightText } from "../../../shared/utils/highlight";
 import { useModal } from "../../../shared/modal/ModalContext";
-import { UserModal } from "../../../features/user";
 import { PostTableData } from "../model/types";
 import PostDetailModal from "./PostDetailModal";
-import { CommentList } from "../../../features/comment";
 import PostEditModal from "./PostEditModal";
 
 interface PostTableProps {
@@ -14,20 +12,24 @@ interface PostTableProps {
   searchQuery: string;
   selectedTag: string;
   onTagClick: (tag: string) => void;
+  onUserClick: (userId?: number) => void;
+  renderComments: (postId: number) => React.ReactNode;
 }
 
-export default function PostTable({ posts, searchQuery, selectedTag, onTagClick }: PostTableProps) {
+export default function PostTable({
+  posts,
+  searchQuery,
+  selectedTag,
+  onTagClick,
+  onUserClick,
+  renderComments,
+}: PostTableProps) {
   const { openModal } = useModal();
   const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
 
   const openPostDetail = (post: PostModel) => {
     openModal((close) => (
-      <PostDetailModal
-        onClose={close}
-        post={post}
-        searchQuery={searchQuery}
-        comment={<CommentList postId={post.id} searchQuery={searchQuery} />}
-      />
+      <PostDetailModal onClose={close} post={post} searchQuery={searchQuery} comment={renderComments(post.id)} />
     ));
   };
 
@@ -70,7 +72,7 @@ export default function PostTable({ posts, searchQuery, selectedTag, onTagClick 
             <TableCell>
               <div
                 className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => openModal((close) => <UserModal userId={post.author?.id} onClose={close} />)}
+                onClick={() => onUserClick(post.author?.id)}
               >
                 <img src={post.author?.image} alt={post.author?.username} className="w-8 h-8 rounded-full" />
                 <span>{post.author?.username}</span>

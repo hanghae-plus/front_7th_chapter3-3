@@ -1,23 +1,26 @@
 import PostsSearchBar from "./PostsSearchBar";
 import { SelectDropdown } from "../../../shared/ui";
 import { useTagsQuery } from "../../../entities/post";
-import { usePostsUrlQuery } from "../../../shared/url-query";
+import { PostFilterParams } from "../model";
 
-export default function PostsFilters() {
-  const { queryParams, setQueryParams } = usePostsUrlQuery();
+interface PostsFiltersProps {
+  filter: PostFilterParams;
+  onFilterChange: (filter: Partial<PostFilterParams>) => void;
+}
 
+export default function PostsFilters({ filter, onFilterChange }: PostsFiltersProps) {
   const { data: tags } = useTagsQuery();
 
   return (
     <div className="flex gap-4">
       <PostsSearchBar
-        searchQuery={queryParams.search || ""}
-        onEnter={(value) => setQueryParams({ search: value, tag: null, sortBy: null, sortOrder: null })}
+        searchQuery={filter.search || ""}
+        onEnter={(value) => onFilterChange({ search: value, tag: null, sortBy: null, sortOrder: null })}
       />
       <SelectDropdown
         options={tags?.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url })) || []}
-        value={queryParams.tag ?? ""}
-        onChange={(value) => setQueryParams({ tag: value, search: null, sortBy: null, sortOrder: null })}
+        value={filter.tag ?? ""}
+        onChange={(value) => onFilterChange({ tag: value, search: null, sortBy: null, sortOrder: null })}
         placeholder="태그 선택"
       />
       <SelectDropdown
@@ -27,8 +30,8 @@ export default function PostsFilters() {
           { label: "제목", value: "title" },
           { label: "반응", value: "reactions" },
         ]}
-        value={queryParams.sortBy || ""}
-        onChange={(value) => setQueryParams({ sortBy: value, tag: null, search: null })}
+        value={filter.sortBy || ""}
+        onChange={(value) => onFilterChange({ sortBy: value, tag: null, search: null })}
         placeholder="정렬 기준"
       />
       <SelectDropdown
@@ -36,8 +39,8 @@ export default function PostsFilters() {
           { label: "오름차순", value: "asc" },
           { label: "내림차순", value: "desc" },
         ]}
-        value={queryParams.sortOrder || ""}
-        onChange={(value) => setQueryParams({ sortOrder: value as "asc" | "desc", tag: null, search: null })}
+        value={filter.sortOrder || ""}
+        onChange={(value) => onFilterChange({ sortOrder: value as "asc" | "desc", tag: null, search: null })}
         placeholder="정렬 순서"
       />
     </div>
