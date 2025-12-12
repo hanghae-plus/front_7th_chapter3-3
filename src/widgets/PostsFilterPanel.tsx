@@ -12,7 +12,7 @@ export const PostsFilterPanel = () => {
   const searchQuery = searchParams.get("search") || ""
   const selectedTag = searchParams.get("tag") || ""
   const sortBy = searchParams.get("sortBy") || ""
-  const sortOrder = searchParams.get("sortOrder") || "asc"
+  const sortOrder = searchParams.get("sortOrder") || ""
 
   // 위젯 자체적으로 tags 데이터 조회
   const { data: tags = [] } = useQuery(tagQueries.list())
@@ -41,19 +41,26 @@ export const PostsFilterPanel = () => {
   }
 
   const handleTagChange = (tag: string) => {
+    // "모든 태그" 선택 시 URL에서 tag 파라미터 제거
     updateSearchParams({
-      tag,
+      tag: tag === "all" ? "" : tag,
       skip: 0,
       search: "",
     })
   }
 
   const handleSortByChange = (value: string) => {
-    updateSearchParams({ sortBy: value })
+    // "없음" 선택 시 URL에서 sortBy 파라미터 제거
+    updateSearchParams({ sortBy: value === "none" ? "" : value })
   }
 
   const handleSortOrderChange = (value: string) => {
-    updateSearchParams({ sortOrder: value })
+    // sortBy가 없으면 기본값 'id' 자동 설정
+    if (!sortBy) {
+      updateSearchParams({ sortBy: "id", sortOrder: value })
+    } else {
+      updateSearchParams({ sortOrder: value })
+    }
   }
 
   return (

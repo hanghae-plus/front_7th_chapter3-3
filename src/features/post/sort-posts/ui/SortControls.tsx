@@ -10,7 +10,7 @@ interface SortControlsProps {
 export const SortControls = ({ sortBy, sortOrder, onSortByChange, onSortOrderChange }: SortControlsProps) => {
   return (
     <>
-      <Select value={sortBy} onValueChange={onSortByChange}>
+      <Select value={sortBy || "none"} onValueChange={onSortByChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="정렬 기준" />
         </SelectTrigger>
@@ -22,7 +22,7 @@ export const SortControls = ({ sortBy, sortOrder, onSortByChange, onSortOrderCha
         </SelectContent>
       </Select>
 
-      <Select value={sortOrder} onValueChange={onSortOrderChange}>
+      <Select value={sortOrder || "asc"} onValueChange={onSortOrderChange}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="정렬 순서" />
         </SelectTrigger>

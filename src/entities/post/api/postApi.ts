@@ -1,7 +1,25 @@
 import { Post, PostsResponse } from "../model/types"
 
-export const fetchPosts = async (params: { limit: number; skip: number }): Promise<PostsResponse> => {
-  const response = await fetch(`/api/posts?limit=${params.limit}&skip=${params.skip}`)
+export const fetchPosts = async (params: {
+  limit: number
+  skip: number
+  sortBy?: string
+  order?: string
+}): Promise<PostsResponse> => {
+  const queryParams = new URLSearchParams({
+    limit: String(params.limit),
+    skip: String(params.skip),
+  })
+
+  if (params.sortBy && params.sortBy !== "none") {
+    queryParams.append("sortBy", params.sortBy)
+    // order는 sortBy가 있을 때만 의미가 있음
+    if (params.order) {
+      queryParams.append("order", params.order)
+    }
+  }
+
+  const response = await fetch(`/api/posts?${queryParams.toString()}`)
   return response.json()
 }
 

@@ -16,6 +16,12 @@ const PostsManagerPage = () => {
   const limit = parseInt(searchParams.get("limit") || "10")
   const searchQuery = searchParams.get("search") || ""
   const selectedTag = searchParams.get("tag") || ""
+  const sortBy = searchParams.get("sortBy") || ""
+  const sortOrder = searchParams.get("sortOrder") || ""
+
+  // sortOrder가 있는데 sortBy가 없으면 기본값으로 'id' 사용
+  const effectiveSortBy = sortOrder && !sortBy ? "id" : sortBy
+  const effectiveSortOrder = sortOrder || "asc"
 
   // 게시물 조회 (검색어, 태그, 페이지네이션 고려)
   // 검색어가 있을 때
@@ -32,7 +38,7 @@ const PostsManagerPage = () => {
 
   // 기본 목록
   const listResult = useQuery({
-    ...postQueries.list({ limit, skip }),
+    ...postQueries.list({ limit, skip, sortBy: effectiveSortBy, order: effectiveSortOrder }),
     enabled: !searchQuery && !selectedTag,
   })
 
@@ -80,7 +86,7 @@ const PostsManagerPage = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>게시물 관리자</span>
-          <CreatePostDialog onSuccess={() => {}} />
+          <CreatePostDialog />
         </CardTitle>
       </CardHeader>
       <CardContent>

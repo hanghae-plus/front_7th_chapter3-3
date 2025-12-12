@@ -16,11 +16,11 @@ export const postQueries = {
   details: () => [...postQueries.all(), "detail"] as const,
 
   /**
-   * 게시물 목록 조회 (페이지네이션)
-   * @param params - limit, skip 페이지네이션 파라미터
+   * 게시물 목록 조회 (페이지네이션 및 정렬)
+   * @param params - limit, skip 페이지네이션 파라미터 및 sortBy, order 정렬 파라미터
    * @returns PostsResponse (posts[], total, skip, limit)
    */
-  list: (params: { limit: number; skip: number }) =>
+  list: (params: { limit: number; skip: number; sortBy?: string; order?: string }) =>
     queryOptions({
       queryKey: [...postQueries.lists(), params],
       queryFn: () => postApi.fetchPosts(params),

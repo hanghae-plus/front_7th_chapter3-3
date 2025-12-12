@@ -9,7 +9,7 @@ interface TagFilterProps {
 
 export const TagFilter = ({ tags, selectedTag, onTagChange }: TagFilterProps) => {
   return (
-    <Select value={selectedTag} onValueChange={onTagChange}>
+    <Select value={selectedTag || "all"} onValueChange={onTagChange}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="태그 선택" />
       </SelectTrigger>

@@ -19,8 +19,8 @@ const App = () => {
             </main>
             <Footer />
           </div>
+          <OverlayContainer />
         </Router>
-        <OverlayContainer />
         <ReactQueryDevtools initialIsOpen={false} />
       </OverlayProvider>
     </QueryClientProvider>
