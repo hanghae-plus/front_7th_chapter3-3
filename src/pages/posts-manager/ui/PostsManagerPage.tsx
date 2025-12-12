@@ -1,35 +1,35 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "../components";
-import { useModal } from "../shared/modal/ModalContext";
-import UserModal from "../features/user/ui/UserModal";
-import PostCreateModal from "../features/post/ui/PostCreateModal";
-import PostEditModal from "../features/post/ui/PostEditModal";
-import PostDetailModal from "../features/post/ui/PostDetailModal";
-import CommentCreateModal from "../features/comment/ui/CommentCreateModal";
-import { PostFormData } from "../features/post/model/types";
-import { PostModel } from "../entities/post/model/types";
-import { CommentFormData, UpdateCommentFormData } from "../features/comment/model/types";
-import CommentEditModal from "../features/comment/ui/CommentEditModal";
-import Pagination from "../shared/ui/Pagination";
-import { UserModel } from "../entities/user/model/types";
-import PostTable from "../features/post/ui/PostTable";
-import CommentList from "../features/comment/ui/CommentList";
-import { CommentModel } from "../entities/comment/model/types";
-import { getUserApi } from "../entities/user/api/user-api";
-import { addPostApi, deletePostApi, updatePostApi } from "../entities/post/api/post-api";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../components";
+import { useModal } from "../../../shared/modal/ModalContext";
+import UserModal from "../../../features/user/ui/UserModal";
+import PostCreateModal from "../../../features/post/ui/PostCreateModal";
+import PostEditModal from "../../../features/post/ui/PostEditModal";
+import PostDetailModal from "../../../features/post/ui/PostDetailModal";
+import CommentCreateModal from "../../../features/comment/ui/CommentCreateModal";
+import { PostFormData } from "../../../features/post/model/types";
+import { PostModel } from "../../../entities/post/model/types";
+import { CommentFormData, UpdateCommentFormData } from "../../../features/comment/model/types";
+import CommentEditModal from "../../../features/comment/ui/CommentEditModal";
+import Pagination from "../../../shared/ui/Pagination";
+import { UserModel } from "../../../entities/user/model/types";
+import PostTable from "../../../features/post/ui/PostTable";
+import CommentList from "../../../features/comment/ui/CommentList";
+import { CommentModel } from "../../../entities/comment/model/types";
+import { getUserApi } from "../../../entities/user/api/user-api";
+import { addPostApi, deletePostApi, updatePostApi } from "../../../entities/post/api/post-api";
 import {
   addCommentApi,
   deleteCommentApi,
   getCommentsApi,
   likeCommentApi,
   updateCommentApi,
-} from "../entities/comment/api/comment-api";
-import PostsFilters from "../features/post-filter/ui/PostsFilters";
-import { useUrlSearchParams } from "../shared/hooks/use-url-search-params";
-import { usePostFilters } from "../features/post-filter/providers/PostFiltersContext";
-import { usePostTableDataQuery } from "../features/post/hooks/use-post-table-data-query";
+} from "../../../entities/comment/api/comment-api";
+import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
+import { useUrlSearchParams } from "../../../shared/hooks/use-url-search-params";
+import { usePostFilters } from "../../../features/post-filter/providers/PostFiltersContext";
+import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
 
 const PostsManager = () => {
   // const navigate = useNavigate();
