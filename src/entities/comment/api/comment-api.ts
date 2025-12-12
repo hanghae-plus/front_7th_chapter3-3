@@ -1,9 +1,10 @@
+import { API_URL } from "../../../shared/config/api-config";
 import { CommentModel } from "../model/types";
 import { AddCommentDto, CommentListApiResponse, UpdateCommentDto } from "./dto";
 
 export const addCommentApi = async (commentDto: AddCommentDto): Promise<CommentModel> => {
   try {
-    const response = await fetch("/api/comments/add", {
+    const response = await fetch(`${API_URL}/comments/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(commentDto),
@@ -18,7 +19,7 @@ export const addCommentApi = async (commentDto: AddCommentDto): Promise<CommentM
 
 export const updateCommentApi = async (commentId: number, commentDto: UpdateCommentDto): Promise<CommentModel> => {
   try {
-    const response = await fetch(`/api/comments/${commentId}`, {
+    const response = await fetch(`${API_URL}/comments/${commentId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(commentDto),
@@ -33,7 +34,7 @@ export const updateCommentApi = async (commentId: number, commentDto: UpdateComm
 
 export const deleteCommentApi = async (commentId: number): Promise<void> => {
   try {
-    await fetch(`/api/comments/${commentId}`, {
+    await fetch(`${API_URL}/comments/${commentId}`, {
       method: "DELETE",
     });
   } catch (error) {
@@ -44,7 +45,7 @@ export const deleteCommentApi = async (commentId: number): Promise<void> => {
 
 export const likeCommentApi = async (commentId: number, likes: number): Promise<CommentModel> => {
   try {
-    const response = await fetch(`/api/comments/${commentId}`, {
+    const response = await fetch(`${API_URL}/comments/${commentId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ likes }),
@@ -59,7 +60,7 @@ export const likeCommentApi = async (commentId: number, likes: number): Promise<
 
 export const getCommentsApi = async (postId: number): Promise<CommentListApiResponse> => {
   try {
-    const response = await fetch(`/api/comments/post/${postId}`);
+    const response = await fetch(`${API_URL}/comments/post/${postId}`);
     const data = await response.json();
     return data;
   } catch (error) {

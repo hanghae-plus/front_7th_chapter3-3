@@ -1,8 +1,9 @@
+import { API_URL } from "../../../shared/config/api-config";
 import { UserGetQueryParams, UserListApiResponse } from "./dto";
 
 export const getUserApi = async (id: number) => {
   try {
-    const response = await fetch(`/api/users/${id}`);
+    const response = await fetch(`${API_URL}/users/${id}`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -13,7 +14,7 @@ export const getUserApi = async (id: number) => {
 
 export const getUsersApi = async (query?: UserGetQueryParams): Promise<UserListApiResponse> => {
   try {
-    const response = await fetch(`/api/users?${new URLSearchParams(query).toString()}`);
+    const response = await fetch(`${API_URL}/users?${new URLSearchParams(query).toString()}`);
     const data = await response.json();
     return data;
   } catch (error) {
