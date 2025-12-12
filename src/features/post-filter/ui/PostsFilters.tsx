@@ -1,7 +1,7 @@
 import PostsSearchBar from "./PostsSearchBar";
 import SelectDropdown from "../../../shared/ui/SelectDropdown";
 import { useTagsQuery } from "../../../entities/post/hooks/use-tags-query";
-import { usePostsUrlQuery } from "../../../pages/posts-manager/providers/PostsUrlQueryContext";
+import { usePostsUrlQuery } from "../../../shared/url-query";
 
 export default function PostsFilters() {
   const { queryParams, setQueryParams } = usePostsUrlQuery();

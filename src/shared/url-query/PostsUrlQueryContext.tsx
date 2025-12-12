@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
-import { PostsUrlQueryParams } from "../model/types";
-import { usePostsUrlQueryModel } from "../hooks/use-posts-url-query-model";
+import { PostsUrlQueryParams } from "./types";
+import { usePostsUrlQueryModel } from "./use-posts-url-query-model";
 
 interface PostsUrlQueryContextValue {
   queryParams: PostsUrlQueryParams;

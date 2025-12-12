@@ -7,7 +7,7 @@ import Pagination from "../../../shared/ui/Pagination";
 import PostTable from "../../../features/post/ui/PostTable";
 import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
 import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
-import { usePostsUrlQuery } from "../providers/PostsUrlQueryContext";
+import { usePostsUrlQuery } from "../../../shared/url-query";
 
 const PostsManager = () => {
   const { queryParams, setQueryParams } = usePostsUrlQuery();
@@ -52,6 +52,7 @@ const PostsManager = () => {
               posts={postsData?.posts || []}
               searchQuery={queryParams.search || ""}
               selectedTag={queryParams.tag || ""}
+              onTagClick={(tag) => setQueryParams({ tag, search: null, sortBy: null, sortOrder: null })}
             />
           )}
 

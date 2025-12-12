@@ -1,7 +1,7 @@
 import { useSearchParams } from "react-router-dom";
-import { buildPostsUrlQueryParams, parsePostsUrlQueryParams } from "../model/posts-url-query-params";
+import { buildPostsUrlQueryParams, parsePostsUrlQueryParams } from "./posts-url-query-params";
 import { useMemo } from "react";
-import { PostsUrlQueryParams } from "../model/types";
+import { PostsUrlQueryParams } from "./types";
 
 export function usePostsUrlQueryModel() {
   const [searchParams, setSearchParams] = useSearchParams();

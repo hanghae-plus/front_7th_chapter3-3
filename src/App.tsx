@@ -2,7 +2,7 @@ import { BrowserRouter as Router } from "react-router-dom";
 import Header from "./components/Header.tsx";
 import Footer from "./components/Footer.tsx";
 import PostsManagerPage from "./pages/posts-manager/ui/PostsManagerPage.tsx";
-import { PostsUrlQueryProvider } from "./pages/posts-manager/providers/PostsUrlQueryContext.tsx";
+import { PostsUrlQueryProvider } from "./shared/url-query";
 
 const App = () => {
   return (
