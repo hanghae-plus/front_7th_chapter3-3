@@ -71,7 +71,7 @@ export default function CommentList({ postId, searchQuery }: CommentListProps) {
                   editCommentMutation({
                     postId,
                     commentId: comment.id,
-                    commentDto: { ...comment, likes: comment.likes + 1 },
+                    commentDto: { ...comment, likes: (comment.likes || 0) + 1 },
                   })
                 }
               >
