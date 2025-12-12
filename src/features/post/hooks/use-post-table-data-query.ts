@@ -3,13 +3,13 @@ import {
   mapPostsUrlQueryParamsToApiParams,
   mapPostsUrlQueryParamsToApiSearchParams,
   mapPostsUrlQueryParamsToApiTagParams,
-} from "../../../entities/post/api/mappers";
+} from "../lib/mappers";
 import { usePostsQuery } from "../../../entities/post/hooks/use-posts-query";
 import { usePostsWithSearchQuery } from "../../../entities/post/hooks/use-posts-with-search-query";
 import { usePostsWithTagQuery } from "../../../entities/post/hooks/use-posts-with-tag-query";
 import { UserListApiResponse } from "../../../entities/user/api/dto";
 import { useUsersQuery } from "../../../entities/user/hooks/use-users-query";
-import { PostsUrlQueryParams } from "../../../pages/posts-manager/model/types";
+import { PostsUrlQueryParams } from "../../../shared/url-query";
 import { PostTableListData } from "../model/types";
 
 interface UsePostTableDataQueryProps {

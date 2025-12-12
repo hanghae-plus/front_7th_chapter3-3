@@ -7,17 +7,17 @@ import UserModal from "../../user/ui/UserModal";
 import { PostTableData } from "../model/types";
 import PostDetailModal from "./PostDetailModal";
 import CommentList from "../../comment/ui/CommentList";
-import { usePostsUrlQuery } from "../../../pages/posts-manager/providers/PostsUrlQueryContext";
 import PostEditModal from "./PostEditModal";
 import { usePostDeleteMutate } from "../../../entities/post/hooks/use-post-delete-mutate";
+
 interface PostTableProps {
   posts: PostTableData[];
   searchQuery: string;
   selectedTag: string;
+  onTagClick: (tag: string) => void;
 }
 
-export default function PostTable({ posts, searchQuery, selectedTag }: PostTableProps) {
-  const { queryParams, setQueryParams } = usePostsUrlQuery();
+export default function PostTable({ posts, searchQuery, selectedTag, onTagClick }: PostTableProps) {
   const { openModal } = useModal();
   const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
 
@@ -26,11 +26,12 @@ export default function PostTable({ posts, searchQuery, selectedTag }: PostTable
       <PostDetailModal
         onClose={close}
         post={post}
-        searchQuery={queryParams.search || ""}
-        comment={<CommentList postId={post.id} searchQuery={queryParams.search || ""} />}
+        searchQuery={searchQuery}
+        comment={<CommentList postId={post.id} searchQuery={searchQuery} />}
       />
     ));
   };
+
   return (
     <Table>
       <TableHeader>
@@ -59,7 +60,7 @@ export default function PostTable({ posts, searchQuery, selectedTag }: PostTable
                           ? "text-white bg-blue-500 hover:bg-blue-600"
                           : "text-blue-800 bg-blue-100 hover:bg-blue-200"
                       }`}
-                      onClick={() => setQueryParams({ tag })}
+                      onClick={() => onTagClick(tag)}
                     >
                       {tag}
                     </span>

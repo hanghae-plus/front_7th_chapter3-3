@@ -1,5 +1,5 @@
-import { PostsUrlQueryParams } from "../../../pages/posts-manager/model/types";
-import { PostsListQueryParams, PostsSearchQueryParams, PostsTagQueryParams } from "./dto";
+import { PostsUrlQueryParams } from "../../../shared/url-query";
+import { PostsListQueryParams, PostsSearchQueryParams, PostsTagQueryParams } from "../../../entities/post/api/dto";
 
 export const mapPostsUrlQueryParamsToApiParams = (params?: PostsUrlQueryParams): PostsListQueryParams => {
   const apiQueryParams: PostsListQueryParams = {};
