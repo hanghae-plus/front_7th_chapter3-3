@@ -11,6 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
+*.tsbuildinfo
+
+# Claude
+.claude
+.history
 
 # Editor directories and files
 .vscode/*
