@@ -34,6 +34,7 @@ import { UserDetailModal } from "../widgets/user-detail/ui/UserDetailModal"
 import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
 import { usePostSearchFilter } from "../features/search-filter-post/model"
 import { PaginationControl } from "../features/control-pagination/ui"
+import { CommentAddModal, CommentEditModal } from "../features/control-comments/ui"
 
 const PostsManager = () => {
   const location = useLocation()
@@ -63,11 +64,6 @@ const PostsManager = () => {
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 })
   const [selectedComment, setSelectedComment] = useState<any>(null)
-  const [newComment, setNewComment] = useState<{ body: string; postId: number | null; userId: number }>({
-    body: "",
-    postId: null,
-    userId: 1,
-  })
   const [showAddCommentDialog, setShowAddCommentDialog] = useState(false)
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
@@ -132,7 +128,6 @@ const PostsManager = () => {
   const createCommentMutation = useCreateCommentMutation(selectedPostIdForComments || 0, {
     onSuccess: () => {
       setShowAddCommentDialog(false)
-      setNewComment({ body: "", postId: null, userId: 1 })
     },
   })
 
@@ -172,19 +167,17 @@ const PostsManager = () => {
   }
 
   // 댓글 추가
-  const addComment = () => {
-    if (!newComment.postId) return
+  const handleAddComment = (body: string, postId: number, userId: number) => {
     createCommentMutation.mutate({
-      body: newComment.body,
-      postId: newComment.postId,
-      userId: newComment.userId,
+      body,
+      postId,
+      userId,
     })
   }
 
   // 댓글 업데이트
-  const updateComment = () => {
-    if (!selectedComment || !selectedComment.id) return
-    updateCommentMutation.mutate({ id: selectedComment.id, body: selectedComment.body })
+  const handleUpdateComment = (id: number, body: string) => {
+    updateCommentMutation.mutate({ id, body })
   }
 
   // 댓글 삭제
@@ -328,7 +321,7 @@ const PostsManager = () => {
         <Button
           size="sm"
           onClick={() => {
-            setNewComment((prev) => ({ ...prev, postId }))
+            setSelectedPostIdForComments(postId)
             setShowAddCommentDialog(true)
           }}
         >
@@ -465,38 +458,21 @@ const PostsManager = () => {
       </Dialog>
 
       {/* 댓글 추가 대화상자 */}
-      <Dialog open={showAddCommentDialog} onOpenChange={setShowAddCommentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>새 댓글 추가</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={newComment.body}
-              onChange={(e) => setNewComment({ ...newComment, body: e.target.value })}
-            />
-            <Button onClick={addComment}>댓글 추가</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CommentAddModal
+        open={showAddCommentDialog}
+        onOpenChange={setShowAddCommentDialog}
+        postId={selectedPostIdForComments}
+        userId={1}
+        onSubmit={handleAddComment}
+      />
 
       {/* 댓글 수정 대화상자 */}
-      <Dialog open={showEditCommentDialog} onOpenChange={setShowEditCommentDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>댓글 수정</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Textarea
-              placeholder="댓글 내용"
-              value={selectedComment?.body || ""}
-              onChange={(e) => setSelectedComment({ ...selectedComment, body: e.target.value })}
-            />
-            <Button onClick={updateComment}>댓글 업데이트</Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <CommentEditModal
+        open={showEditCommentDialog}
+        onOpenChange={setShowEditCommentDialog}
+        comment={selectedComment}
+        onSubmit={handleUpdateComment}
+      />
 
       {/* 게시물 상세 보기 대화상자 */}
       <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>
