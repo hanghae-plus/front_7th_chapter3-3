@@ -1,13 +1,6 @@
-import { useState, useEffect } from "react"
-import { fetchTags } from "../api/fetch-tags"
-import { Tag } from "../model/tag"
+import { useTagsQuery } from "./use-tags-query"
 
 export const useTags = () => {
-  const [tags, setTags] = useState<Tag[]>([])
-
-  useEffect(() => {
-    fetchTags().then((data) => setTags(data))
-  }, [])
-
+  const { data: tags = [] } = useTagsQuery()
   return tags
 }

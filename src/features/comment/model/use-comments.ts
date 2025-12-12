@@ -1,52 +1,57 @@
-import { useState, useCallback } from "react"
-import { fetchComments } from "@/entities/comment/api/fetch-comments"
+import { useCallback } from "react"
+import { useCommentsQuery } from "@/entities/comment/model/use-comments-query"
+import { useQueryClient } from "@tanstack/react-query"
+import { COMMENTS_QUERY_KEY } from "@/entities/comment/model/use-comments-query"
 import { Comment } from "@/entities/comment/model/comment"
 
 export const useComments = () => {
-  const [comments, setComments] = useState<Record<number, Comment[]>>({})
+  const queryClient = useQueryClient()
 
-  const loadComments = useCallback(async (postId: number) => {
-    try {
-      const data = await fetchComments(postId)
-      setComments((prev) => ({
-        ...prev,
-        [postId]: data,
-      }))
-    } catch (error) {
-      console.error("댓글 가져오기 오류:", error)
-    }
-  }, [])
+  // 임시로 빈 Record 반환 (PostsManagerPage에서 currentPostId 기반으로 개별 조회)
+  const comments: Record<number, Comment[]> = {}
 
-  const addCommentToState = useCallback((postId: number, comment: Comment) => {
-    setComments((prev) => ({
-      ...prev,
-      [postId]: [comment, ...(prev[postId] || [])],
-    }))
-  }, [])
+  const loadComments = useCallback(
+    async (postId: number) => {
+      await queryClient.invalidateQueries({ queryKey: [...COMMENTS_QUERY_KEY, postId] })
+    },
+    [queryClient],
+  )
 
-  const updateCommentInState = useCallback((postId: number, commentId: number, updatedComment: Comment) => {
-    setComments((prev) => ({
-      ...prev,
-      [postId]: prev[postId]?.map((comment) => (comment.id === commentId ? updatedComment : comment)) || [],
-    }))
-  }, [])
+  const addCommentToState = useCallback(
+    (postId: number, comment: Comment) => {
+      queryClient.setQueryData<Comment[]>([...COMMENTS_QUERY_KEY, postId], (old = []) => [comment, ...old])
+    },
+    [queryClient],
+  )
 
-  const removeCommentFromState = useCallback((postId: number, commentId: number) => {
-    setComments((prev) => ({
-      ...prev,
-      [postId]: prev[postId]?.filter((comment) => comment.id !== commentId) || [],
-    }))
-  }, [])
+  const updateCommentInState = useCallback(
+    (_postId: number, commentId: number, updatedComment: Comment) => {
+      queryClient.setQueryData<Comment[]>([...COMMENTS_QUERY_KEY, _postId], (old = []) =>
+        old.map((comment) => (comment.id === commentId ? updatedComment : comment)),
+      )
+    },
+    [queryClient],
+  )
 
-  const likeCommentInState = useCallback((postId: number, commentId: number) => {
-    setComments((prev) => ({
-      ...prev,
-      [postId]:
-        prev[postId]?.map((comment) =>
+  const removeCommentFromState = useCallback(
+    (postId: number, commentId: number) => {
+      queryClient.setQueryData<Comment[]>([...COMMENTS_QUERY_KEY, postId], (old = []) =>
+        old.filter((comment) => comment.id !== commentId),
+      )
+    },
+    [queryClient],
+  )
+
+  const likeCommentInState = useCallback(
+    (postId: number, commentId: number) => {
+      queryClient.setQueryData<Comment[]>([...COMMENTS_QUERY_KEY, postId], (old = []) =>
+        old.map((comment) =>
           comment.id === commentId ? { ...comment, likes: comment.likes + 1 } : comment,
-        ) || [],
-    }))
-  }, [])
+        ),
+      )
+    },
+    [queryClient],
+  )
 
   return {
     comments,
@@ -56,4 +61,10 @@ export const useComments = () => {
     removeCommentFromState,
     likeCommentInState,
   }
+}
+
+// 개별 포스트의 댓글을 가져오는 hook
+export const usePostComments = (postId: number | null) => {
+  const { data: comments = [] } = useCommentsQuery(postId)
+  return comments
 }

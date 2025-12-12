@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Plus, Search } from "lucide-react"
 import {
   Button,
@@ -19,7 +19,7 @@ import { SelectBox } from "@/widgets/select-box"
 import { usePosts } from "@/features/post/model"
 import { PostAddDialog, PostEditDialog, PostDetailDialog } from "@/features/post/ui"
 import { CommentAddDialog, CommentEditDialog } from "@/features/comment/ui"
-import { useComments } from "@/features/comment/model"
+import { useComments, usePostComments } from "@/features/comment/model"
 import { UserModal } from "@/entities/user/ui"
 import { useStore } from "@/shared/store"
 import { usePostHandlers, useCommentHandlers, useUserHandlers } from "./PostsManagerPage/hooks"
@@ -177,11 +177,16 @@ const PostsManagePage = () => {
   } = useStore()
 
   // 게시물 관련 상태 및 훅
-  const { posts, total, loading, refetchPosts, searchPosts, fetchPostsByTag, addPostToState, removePostFromState } =
-    usePosts()
+  const { posts, total, loading, refetchPosts, searchPosts, addPostToState, removePostFromState } = usePosts({
+    skip,
+    limit,
+    tag: selectedTag,
+    search: urlSearchQuery,
+  })
 
   // 댓글 관련 상태 및 훅
-  const { comments, loadComments, removeCommentFromState, likeCommentInState } = useComments()
+  const { loadComments, removeCommentFromState, likeCommentInState } = useComments()
+  const currentComments = usePostComments(currentPostId)
 
   // 사용자 관련 핸들러
   const { showUserModal, setShowUserModal, selectedUser, openUserModal } = useUserHandlers()
@@ -212,15 +217,6 @@ const PostsManagePage = () => {
   })
 
   const tags = useTags()
-
-  // URL 파라미터가 변경될 때 게시물 다시 불러오기
-  useEffect(() => {
-    if (selectedTag) {
-      fetchPostsByTag(selectedTag)
-    } else {
-      refetchPosts({ skip, limit })
-    }
-  }, [skip, limit, sortBy, sortOrder, selectedTag, refetchPosts, fetchPostsByTag])
 
   // 검색 실행
   const handleSearch = () => {
@@ -305,7 +301,7 @@ const PostsManagePage = () => {
         onOpenChange={setShowPostDetailDialog}
         post={selectedPost}
         searchQuery={urlSearchQuery}
-        comments={currentPostId ? comments[currentPostId] || [] : []}
+        comments={currentComments}
         onAddComment={() => setShowAddCommentDialog(true)}
         onLikeComment={handleLikeComment}
         onEditComment={(comment) => {

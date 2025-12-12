@@ -1,87 +1,89 @@
-import { useState, useCallback } from "react"
+import { useCallback } from "react"
 import { Post } from "@/entities/post/model/post"
-import { User } from "@/entities/user/model/user"
-import { fetchPosts } from "@/entities/post/api/fetch-posts"
-import { fetchPostsByTag as fetchPostsByTagAPI } from "@/entities/post/api/fetch-posts-by-tag"
-import { searchPosts as searchPostsAPI } from "@/entities/post/api/search-posts"
+import { usePostsQuery } from "@/entities/post/model/use-posts-query"
+import { useUsersQuery } from "@/entities/user/model/use-users-query"
+import { useQueryClient } from "@tanstack/react-query"
+import { POSTS_QUERY_KEY } from "@/entities/post/model/use-posts-query"
 
-export const usePosts = () => {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(false)
+interface UsePostsParams {
+  skip?: number
+  limit?: number
+  tag?: string
+  search?: string
+}
 
-  // Helper to join posts with users
-  const joinPostsWithUsers = async (posts: Post[]) => {
-    const usersResponse = await fetch("/api/users?limit=0&select=username,image")
-    const usersData = await usersResponse.json()
-    const users = usersData.users as User[]
+export const usePosts = (params: UsePostsParams = {}) => {
+  const queryClient = useQueryClient()
+  const { data: usersData } = useUsersQuery()
+  const users = usersData?.users || []
 
-    return posts.map((post) => ({
-      ...post,
-      author: users.find((user) => user.id === post.userId),
-    }))
-  }
+  const { data, isLoading, refetch } = usePostsQuery(params, users)
 
-  const refetchPosts = useCallback(async (options?: { skip: number; limit: number }) => {
-    setLoading(true)
-    try {
-      const data = await fetchPosts(options)
-      const postsWithUsers = await joinPostsWithUsers(data.posts)
-      setPosts(postsWithUsers)
-      setTotal(data.total)
-    } catch (error) {
-      console.error("게시물 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const posts = data?.posts || []
+  const total = data?.total || 0
 
-  const searchPosts = useCallback(async (query: string) => {
-    if (!query) return
-    setLoading(true)
-    try {
-      const data = await searchPostsAPI(query)
-      const postsWithUsers = await joinPostsWithUsers(data.posts)
-      setPosts(postsWithUsers)
-      setTotal(data.total)
-    } catch (error) {
-      console.error("게시물 검색 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const refetchPosts = useCallback(
+    async (options?: { skip: number; limit: number }) => {
+      await queryClient.invalidateQueries({ queryKey: POSTS_QUERY_KEY })
+      if (options) {
+        await refetch()
+      }
+    },
+    [queryClient, refetch],
+  )
 
-  const fetchPostsByTag = useCallback(async (tag: string) => {
-    if (!tag || tag === "all") {
-      return
-    }
-    setLoading(true)
-    try {
-      const data = await fetchPostsByTagAPI(tag)
-      const postsWithUsers = await joinPostsWithUsers(data.posts)
-      setPosts(postsWithUsers)
-      setTotal(data.total)
-    } catch (error) {
-      console.error("태그별 게시물 가져오기 오류:", error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const searchPosts = useCallback(
+    async (_query: string) => {
+      // 검색은 params를 통해 처리되므로 여기서는 invalidate만
+      await queryClient.invalidateQueries({ queryKey: POSTS_QUERY_KEY })
+    },
+    [queryClient],
+  )
 
-  const addPostToState = useCallback((newPost: Post) => {
-    setPosts((prevPosts) => [newPost, ...prevPosts])
-    setTotal((prevTotal) => prevTotal + 1)
-  }, [])
+  const fetchPostsByTag = useCallback(
+    async (_tag: string) => {
+      // 태그 필터링도 params를 통해 처리되므로 invalidate만
+      await queryClient.invalidateQueries({ queryKey: POSTS_QUERY_KEY })
+    },
+    [queryClient],
+  )
 
-  const removePostFromState = useCallback((postId: number) => {
-    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId))
-    setTotal((prevTotal) => prevTotal - 1)
-  }, [])
+  const addPostToState = useCallback(
+    (newPost: Post) => {
+      queryClient.setQueryData<{ posts: Post[]; total: number }>(
+        [...POSTS_QUERY_KEY, params],
+        (old) => {
+          if (!old) return { posts: [newPost], total: 1 }
+          return {
+            posts: [newPost, ...old.posts],
+            total: old.total + 1,
+          }
+        },
+      )
+    },
+    [queryClient, params],
+  )
+
+  const removePostFromState = useCallback(
+    (postId: number) => {
+      queryClient.setQueryData<{ posts: Post[]; total: number }>(
+        [...POSTS_QUERY_KEY, params],
+        (old) => {
+          if (!old) return old
+          return {
+            posts: old.posts.filter((post) => post.id !== postId),
+            total: old.total - 1,
+          }
+        },
+      )
+    },
+    [queryClient, params],
+  )
 
   return {
     posts,
     total,
-    loading,
+    loading: isLoading,
     refetchPosts,
     searchPosts,
     fetchPostsByTag,
