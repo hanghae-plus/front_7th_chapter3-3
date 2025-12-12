@@ -2,7 +2,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui";
 import { BaseModalProps } from "./types";
 
 interface ModalComponentProps extends BaseModalProps {
-  title: string;
+  title: string | React.ReactNode;
   children: React.ReactNode;
 }
 

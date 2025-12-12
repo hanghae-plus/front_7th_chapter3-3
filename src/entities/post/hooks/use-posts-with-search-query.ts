@@ -15,7 +15,7 @@ export function usePostsWithSearchQuery<TQueryFnData, TError = unknown, TData = 
   select,
 }: UsePostsWithSearchQueryProps<TQueryFnData, TError, TData>) {
   return useQuery({
-    queryKey: postsKeys.listBySearch(params),
+    queryKey: postsKeys.listBySearch(params?.q ?? "", params),
     queryFn: () => getPostsBySearchApi(params),
     staleTime: STALE_TIME.DYNAMIC,
     select,
