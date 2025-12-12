@@ -1,0 +1,1 @@
+export { postQueries } from "./postQueries"

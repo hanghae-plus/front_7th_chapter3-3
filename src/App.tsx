@@ -1,19 +1,29 @@
 import { BrowserRouter as Router } from "react-router-dom"
-import Header from "./components/Header.tsx"
-import Footer from "./components/Footer.tsx"
-import PostsManagerPage from "./pages/PostsManagerPage.tsx"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { queryClient } from "@/shared/lib"
+import { OverlayProvider, OverlayContainer } from "@/shared/lib/overlay"
+import { Header } from "@/widgets/Header"
+import { Footer } from "@/widgets/Footer"
+import PostsManagerPage from "@/pages/PostsManagerPage"
 
 const App = () => {
   return (
-    <Router>
-      <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-grow container mx-auto px-4 py-8">
-          <PostsManagerPage />
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <QueryClientProvider client={queryClient}>
+      <OverlayProvider>
+        <Router>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow container mx-auto px-4 py-8">
+              <PostsManagerPage />
+            </main>
+            <Footer />
+          </div>
+          <OverlayContainer />
+        </Router>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </OverlayProvider>
+    </QueryClientProvider>
   )
 }
 
