@@ -1,5 +1,12 @@
 import { PostModel, PostTagModel } from "../model/types";
-import { AddPostDto, PostGetQueryParams, PostListApiResponse, UpdatePostDto } from "./dto";
+import {
+  AddPostDto,
+  PostsListQueryParams,
+  PostListApiResponse,
+  PostsSearchQueryParams,
+  PostsTagQueryParams,
+  UpdatePostDto,
+} from "./dto";
 
 export const addPostApi = async (postDto: AddPostDto): Promise<PostModel> => {
   try {
@@ -42,7 +49,7 @@ export const deletePostApi = async (postId: number): Promise<void> => {
   }
 };
 
-export const getPostsApi = async (query?: PostGetQueryParams): Promise<PostListApiResponse> => {
+export const getPostsApi = async (query?: PostsListQueryParams): Promise<PostListApiResponse> => {
   try {
     const response = await fetch(`/api/posts?${new URLSearchParams(query).toString()}`);
     const data = await response.json();
@@ -53,9 +60,9 @@ export const getPostsApi = async (query?: PostGetQueryParams): Promise<PostListA
   }
 };
 
-export const getPostsBySearchApi = async (search: string): Promise<PostListApiResponse> => {
+export const getPostsBySearchApi = async (params?: PostsSearchQueryParams): Promise<PostListApiResponse> => {
   try {
-    const response = await fetch(`/api/posts/search?q=${search}`);
+    const response = await fetch(`/api/posts/search?${new URLSearchParams(params).toString()}`);
     const data = await response.json();
     return data;
   } catch (error) {
@@ -64,9 +71,9 @@ export const getPostsBySearchApi = async (search: string): Promise<PostListApiRe
   }
 };
 
-export const getPostsByTagApi = async (tag: string): Promise<PostListApiResponse> => {
+export const getPostsByTagApi = async (params?: PostsTagQueryParams): Promise<PostListApiResponse> => {
   try {
-    const response = await fetch(`/api/posts/tag/${tag}`);
+    const response = await fetch(`/api/posts/tag?${new URLSearchParams(params).toString()}`);
     const data = await response.json();
     return data;
   } catch (error) {

@@ -1,10 +1,10 @@
 import { postsKeys } from "../api/posts-keys";
 import { getPostsApi } from "../api/post-api";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
-import { PostGetQueryParams, PostListApiResponse } from "../api/dto";
+import { PostsListQueryParams, PostListApiResponse } from "../api/dto";
 
 interface UsePostsQueryProps<TQueryFnData, TError = unknown, TData = TQueryFnData> {
-  params?: PostGetQueryParams;
+  params?: PostsListQueryParams;
   select?: UseQueryOptions<PostListApiResponse, TError, TData>["select"];
   enabled?: boolean;
 }

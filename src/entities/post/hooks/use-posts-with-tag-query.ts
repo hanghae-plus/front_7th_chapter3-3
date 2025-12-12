@@ -1,22 +1,22 @@
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { getPostsByTagApi } from "../api/post-api";
 import { postsKeys } from "../api/posts-keys";
-import { PostListApiResponse } from "../api/dto";
+import { PostListApiResponse, PostsTagQueryParams } from "../api/dto";
 
 interface UsePostsWithTagQueryProps<TQueryFnData, TError = unknown, TData = TQueryFnData> {
-  tag?: string;
+  params?: PostsTagQueryParams;
   select?: UseQueryOptions<PostListApiResponse, TError, TData>["select"];
   enabled?: boolean;
 }
 
 export function usePostsWithTagQuery<TQueryFnData, TError = unknown, TData = TQueryFnData>({
-  tag = "",
+  params,
   enabled = true,
   select,
 }: UsePostsWithTagQueryProps<TQueryFnData, TError, TData>) {
   return useQuery({
-    queryKey: postsKeys.listByTag(tag),
-    queryFn: () => getPostsByTagApi(tag),
+    queryKey: postsKeys.listByTag(params),
+    queryFn: () => getPostsByTagApi(params),
     select,
     enabled,
   });
