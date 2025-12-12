@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../components";
 import { useModal } from "../../../shared/modal/ModalContext";
@@ -148,6 +148,10 @@ const PostsManager = () => {
   const { loading, data: postsData } = usePostTableDataQuery({
     urlQueryParams: queryParams,
   });
+
+  useEffect(() => {
+    setQueryParams({ limit, skip });
+  }, [limit, skip]);
 
   return (
     <Card className="w-full max-w-6xl mx-auto">
