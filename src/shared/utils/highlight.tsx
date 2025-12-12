@@ -1,4 +1,3 @@
-// 하이라이트 함수 추가
 export const highlightText = (text: string, highlight: string) => {
   if (!text) return null;
   if (!highlight.trim()) {
