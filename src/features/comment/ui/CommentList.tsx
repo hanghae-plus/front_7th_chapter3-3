@@ -2,9 +2,10 @@ import { CommentModel } from "../../../entities/comment/model/types";
 import { Button } from "../../../components";
 import { Plus, ThumbsUp, Edit2, Trash2 } from "lucide-react";
 import { highlightText } from "../../../shared/utils/highlight";
+import { useCommentsQuery } from "../../../entities/comment/hooks/use-comments-query";
 
 interface CommentListProps {
-  comments: CommentModel[];
+  postId: number;
   searchQuery: string;
   onClickLikeAction: (comment: CommentModel) => void;
   onClickEditAction: (comment: CommentModel) => void;
@@ -13,13 +14,16 @@ interface CommentListProps {
 }
 
 export default function CommentList({
-  comments,
+  postId,
   searchQuery,
   onClickLikeAction,
   onClickEditAction,
   onClickDeleteAction,
   onClickAddAction,
 }: CommentListProps) {
+  const { data: commentsData } = useCommentsQuery({ postId, enabled: !!postId });
+  const comments = commentsData?.comments || [];
+
   return (
     <div className="mt-2">
       <div className="flex items-center justify-between mb-2">

@@ -19,7 +19,6 @@ import { getUserApi } from "../../../entities/user/api/user-api";
 import {
   addCommentApi,
   deleteCommentApi,
-  getCommentsApi,
   likeCommentApi,
   updateCommentApi,
 } from "../../../entities/comment/api/comment-api";
@@ -43,11 +42,11 @@ const PostsManager = () => {
   const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
 
   // 댓글 가져오기
-  const fetchComments = async (postId: number) => {
-    if (comments[postId]) return; // 이미 불러온 댓글이 있으면 다시 불러오지 않음
-    const commentsData = await getCommentsApi(postId);
-    setComments((prev) => ({ ...prev, [postId]: commentsData.comments }));
-  };
+  // const fetchComments = async (postId: number) => {
+  //   if (comments[postId]) return; // 이미 불러온 댓글이 있으면 다시 불러오지 않음
+  //   const commentsData = await getCommentsApi(postId);
+  //   setComments((prev) => ({ ...prev, [postId]: commentsData.comments }));
+  // };
 
   // 댓글 추가
   const addComment = async (commentForm: CommentFormData) => {
@@ -94,7 +93,6 @@ const PostsManager = () => {
 
   // 게시물 상세 보기
   const openPostDetail = (post: PostModel) => {
-    fetchComments(post.id);
     openModal((close) => (
       <PostDetailModal
         onClose={close}
@@ -102,7 +100,7 @@ const PostsManager = () => {
         searchQuery={queryParams.search || ""}
         comment={
           <CommentList
-            comments={comments?.[post.id] || []}
+            postId={post.id}
             searchQuery={queryParams.search || ""}
             onClickLikeAction={(comment) => likeComment(comment.id, post.id)}
             onClickEditAction={(comment) => {
