@@ -21,7 +21,7 @@ export const SelectBox = forwardRef<HTMLButtonElement, SelectBoxProps>(
   ({ value, onValueChange, placeholder, options, className, disabled, children }, ref) => {
     return (
       <Select value={value?.toString()} onValueChange={onValueChange} disabled={disabled}>
-        <SelectTrigger ref={ref} className={className}>
+        <SelectTrigger ref={ref} className={className} style={{ width: '180px' }}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

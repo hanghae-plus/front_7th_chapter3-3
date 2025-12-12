@@ -68,6 +68,16 @@ export const usePosts = () => {
     }
   }, [])
 
+  const addPostToState = useCallback((newPost: Post) => {
+    setPosts((prevPosts) => [newPost, ...prevPosts])
+    setTotal((prevTotal) => prevTotal + 1)
+  }, [])
+
+  const removePostFromState = useCallback((postId: number) => {
+    setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId))
+    setTotal((prevTotal) => prevTotal - 1)
+  }, [])
+
   return {
     posts,
     total,
@@ -75,5 +85,7 @@ export const usePosts = () => {
     refetchPosts,
     searchPosts,
     fetchPostsByTag,
+    addPostToState,
+    removePostFromState,
   }
 }

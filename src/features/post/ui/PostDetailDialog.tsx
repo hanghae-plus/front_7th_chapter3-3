@@ -48,14 +48,14 @@ export const PostDetailDialog = ({
                 댓글 추가
               </Button>
             </div>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {comments.map((comment) => (
-                <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
-                  <div className="flex items-center space-x-2 overflow-hidden">
-                    <span className="font-medium truncate">{comment.user.username}:</span>
-                    <span className="truncate">{highlightText(comment.body, searchQuery)}</span>
+                <div key={comment.id} className="flex items-start justify-between text-sm border-b pb-2 gap-2">
+                  <div className="flex-1 min-w-0">
+                    <span className="font-medium">{comment.user.username}:</span>{" "}
+                    <span className="break-words">{highlightText(comment.body, searchQuery)}</span>
                   </div>
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-1 flex-shrink-0">
                     <Button variant="ghost" size="sm" onClick={() => onLikeComment(comment.id)}>
                       <ThumbsUp className="w-3 h-3" />
                       <span className="ml-1 text-xs">{comment.likes}</span>

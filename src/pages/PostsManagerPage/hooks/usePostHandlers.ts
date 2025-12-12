@@ -1,5 +1,6 @@
 import { Post } from "@/entities/post/model/post"
 import { usePostMutations } from "@/entities/post/model"
+import { User } from "@/entities/user/model/user"
 
 interface UsePostHandlersProps {
   refetchPosts: (options?: { skip: number; limit: number }) => void
@@ -11,6 +12,8 @@ interface UsePostHandlersProps {
   loadComments: (postId: number) => void
   skip: number
   limit: number
+  addPostToState: (post: Post) => void
+  removePostFromState: (postId: number) => void
 }
 
 export const usePostHandlers = ({
@@ -23,6 +26,8 @@ export const usePostHandlers = ({
   loadComments,
   skip,
   limit,
+  addPostToState,
+  removePostFromState,
 }: UsePostHandlersProps) => {
   const { createPost, updatePost, deletePost } = usePostMutations({
     onSuccess: () => {
@@ -32,9 +37,26 @@ export const usePostHandlers = ({
 
   const handleAddPost = async (post: { title: string; body: string; userId: number }) => {
     await createPost(post, {
-      onSuccess: () => {
+      onSuccess: async (_message, createdPost) => {
         setShowAddDialog(false)
-        refetchPosts({ skip, limit })
+        if (createdPost) {
+          // 사용자 정보를 가져와서 게시물에 추가
+          try {
+            const usersResponse = await fetch("/api/users?limit=0&select=username,image")
+            const usersData = await usersResponse.json()
+            const users = usersData.users as User[]
+            const author = users.find((user) => user.id === createdPost.userId)
+            const postWithAuthor = { ...createdPost, author }
+            addPostToState(postWithAuthor)
+          } catch (error) {
+            console.error("사용자 정보 가져오기 오류:", error)
+            // 실패하면 전체 재조회
+            refetchPosts({ skip, limit })
+          }
+        } else {
+          // createdPost가 없으면 전체 재조회
+          refetchPosts({ skip, limit })
+        }
       },
     })
   }
@@ -50,8 +72,12 @@ export const usePostHandlers = ({
   }
 
   const handleDeletePost = async (id: number) => {
-    await deletePost(id)
-    refetchPosts({ skip, limit })
+    await deletePost(id, {
+      onSuccess: () => {
+        // 즉시 UI에서 제거
+        removePostFromState(id)
+      },
+    })
   }
 
   const openPostDetail = (post: Post) => {

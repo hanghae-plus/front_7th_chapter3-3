@@ -5,16 +5,16 @@ import { updatePost as updatePostApi } from "@/entities/post/api/update-post"
 import { deletePost as deletePostApi } from "@/entities/post/api/delete-post"
 
 interface UsePostMutationsOptions {
-  onSuccess?: (message: string) => void
+  onSuccess?: (message: string, data?: Post) => void
   onError?: (error: unknown) => void
 }
 
 export const usePostMutations = (defaultOptions?: UsePostMutationsOptions) => {
   const [loading, setLoading] = useState(false)
 
-  const handleSuccess = (message: string, options?: UsePostMutationsOptions) => {
+  const handleSuccess = (message: string, options?: UsePostMutationsOptions, data?: Post) => {
     const onSuccess = options?.onSuccess || defaultOptions?.onSuccess
-    onSuccess?.(message)
+    onSuccess?.(message, data)
   }
 
   const handleError = (error: unknown, options?: UsePostMutationsOptions) => {
@@ -26,8 +26,8 @@ export const usePostMutations = (defaultOptions?: UsePostMutationsOptions) => {
   const createPost = async (newPost: Partial<Post>, options?: UsePostMutationsOptions) => {
     setLoading(true)
     try {
-      await addPost(newPost)
-      handleSuccess("게시글이 추가되었습니다.", options)
+      const createdPost = await addPost(newPost)
+      handleSuccess("게시글이 추가되었습니다.", options, createdPost)
     } catch (error) {
       handleError(error, options)
     } finally {

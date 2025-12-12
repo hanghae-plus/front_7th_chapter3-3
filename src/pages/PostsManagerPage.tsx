@@ -1,6 +1,18 @@
 import { useEffect, useState } from "react"
 import { Plus, Search } from "lucide-react"
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared"
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared"
 import { useTags } from "@/entities/tag/model/tag-queries"
 import { PostTable } from "@/entities/post/ui"
 import { SelectBox } from "@/widgets/select-box"
@@ -49,17 +61,14 @@ const PostsFilterBar = ({
             className="pl-8"
             value={searchInput}
             onChange={(e) => onSearchInputChange(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && onSearch()}
+            onKeyDown={(e) => e.key === "Enter" && onSearch()}
           />
         </div>
       </div>
       <SelectBox
         value={selectedTag}
         placeholder="태그 선택"
-        options={[
-          { value: "all", label: "모든 태그" },
-          ...tags.map((tag) => ({ value: tag.slug, label: tag.slug })),
-        ]}
+        options={[{ value: "all", label: "모든 태그" }, ...(tags || []).map((tag) => ({ value: tag.slug, label: tag.slug }))]}
         onValueChange={onTagChange}
       />
       <SelectBox
@@ -134,7 +143,15 @@ const Pagination = ({ skip, limit, total, onSkipChange, onLimitChange }: Paginat
 
 const PostsManagePage = () => {
   // URL 파라미터 관리 (간소화됨)
-  const { skip, limit, searchQuery: urlSearchQuery, sortBy, sortOrder, selectedTag, updateParams } = usePostsSearchParams()
+  const {
+    skip,
+    limit,
+    searchQuery: urlSearchQuery,
+    sortBy,
+    sortOrder,
+    selectedTag,
+    updateParams,
+  } = usePostsSearchParams()
 
   // 로컬 검색 입력 상태
   const [searchInput, setSearchInput] = useState(urlSearchQuery)
@@ -160,7 +177,8 @@ const PostsManagePage = () => {
   } = useStore()
 
   // 게시물 관련 상태 및 훅
-  const { posts, total, loading, refetchPosts, searchPosts, fetchPostsByTag } = usePosts()
+  const { posts, total, loading, refetchPosts, searchPosts, fetchPostsByTag, addPostToState, removePostFromState } =
+    usePosts()
 
   // 댓글 관련 상태 및 훅
   const { comments, loadComments, removeCommentFromState, likeCommentInState } = useComments()
@@ -179,6 +197,8 @@ const PostsManagePage = () => {
     loadComments,
     skip,
     limit,
+    addPostToState,
+    removePostFromState,
   })
 
   // 댓글 핸들러
