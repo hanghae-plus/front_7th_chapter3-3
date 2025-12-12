@@ -12,11 +12,6 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Table,
   TableBody,
   TableCell,
@@ -38,6 +33,7 @@ import { useUserList } from "../entities/users/model"
 import { UserDetailModal } from "../widgets/user-detail/ui/UserDetailModal"
 import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
 import { usePostSearchFilter } from "../features/search-filter-post/model"
+import { PaginationControl } from "../features/control-pagination/ui"
 
 const PostsManager = () => {
   const location = useLocation()
@@ -412,30 +408,7 @@ const PostsManager = () => {
           {isLoading ? <div className="flex justify-center p-4">로딩 중...</div> : renderPostTable()}
 
           {/* 페이지네이션 */}
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <span>표시</span>
-              <Select value={limit.toString()} onValueChange={(value) => setLimit(Number(value))}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="10" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="30">30</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>항목</span>
-            </div>
-            <div className="flex gap-2">
-              <Button disabled={skip === 0} onClick={() => setSkip(Math.max(0, skip - limit))}>
-                이전
-              </Button>
-              <Button disabled={skip + limit >= total} onClick={() => setSkip(skip + limit)}>
-                다음
-              </Button>
-            </div>
-          </div>
+          <PaginationControl limit={limit} skip={skip} total={total} onLimitChange={setLimit} onSkipChange={setSkip} />
         </div>
       </CardContent>
 
