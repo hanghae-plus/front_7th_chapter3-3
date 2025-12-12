@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui"
 import { Post } from "@/entities/post"
 import { commentQueries } from "@/entities/comment"
-import { CommentList } from "./CommentList"
+import { CommentList } from "@/widgets/CommentList"
 import { highlightText } from "@/shared/lib"
 import { OverlayController } from "@/shared/lib/overlay"
 
