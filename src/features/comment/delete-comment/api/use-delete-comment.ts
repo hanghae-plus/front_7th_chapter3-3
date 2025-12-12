@@ -3,10 +3,7 @@ import * as commentApi from "@/entities/comment/api/commentApi"
 import { commentQueries } from "@/entities/comment/queries"
 
 /**
- * 댓글 삭제 기능 (낙관적 업데이트 적용)
- *
- * FSD 공식 가이드:
- * "기능 근처 커스텀 훅에서 useMutation 로직과 queryClient 갱신을 함께 정의"
+ * 댓글 삭제 기능
  *
  * 동작 방식:
  * 1. onMutate: 즉시 UI에서 댓글 제거

@@ -3,10 +3,7 @@ import * as commentApi from "@/entities/comment/api/commentApi"
 import { commentQueries } from "@/entities/comment/queries"
 
 /**
- * 댓글 좋아요 기능 (낙관적 업데이트 적용)
- *
- * FSD 공식 가이드:
- * "기능 근처 커스텀 훅에서 useMutation 로직과 queryClient 갱신을 함께 정의"
+ * 댓글 좋아요 기능
  *
  * 동작 방식:
  * 1. onMutate: 즉시 UI에 좋아요 수 증가 반영
@@ -35,7 +32,7 @@ export const useLikeComment = () => {
         return {
           ...old,
           comments: old.comments.map((comment: any) =>
-            comment.id === id ? { ...comment, likes: comment.likes + 1 } : comment
+            comment.id === id ? { ...comment, likes: comment.likes + 1 } : comment,
           ),
         }
       })
