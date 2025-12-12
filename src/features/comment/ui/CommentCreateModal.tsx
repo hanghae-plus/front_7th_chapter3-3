@@ -3,10 +3,12 @@ import ModalComponent from "../../../shared/modal/ModalComponent";
 import { CommentFormData } from "../model/types";
 import { useState } from "react";
 import { Button, Textarea } from "../../../shared/ui";
-import { useCommentAddMutate } from "../../../entities/comment/hooks/use-comment-add-mutate";
+import {
+  CommentListApiResponse,
+  commentKeys,
+  useCommentAddMutate,
+} from "../../../entities/comment";
 import { useQueryClient } from "@tanstack/react-query";
-import { commentKeys } from "../../../entities/comment/api/comment-keys";
-import { CommentListApiResponse } from "../../../entities/comment/api/dto";
 
 interface CommentCreateModalProps extends BaseModalProps {
   onClose: () => void;

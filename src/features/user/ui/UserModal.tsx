@@ -1,6 +1,6 @@
 import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
-import { useUserQuery } from "../../../entities/user/hooks/use-user-query";
+import { useUserQuery } from "../../../entities/user";
 
 interface UserModalProps extends BaseModalProps {
   onClose: () => void;

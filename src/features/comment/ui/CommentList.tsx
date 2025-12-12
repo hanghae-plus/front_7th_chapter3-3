@@ -1,16 +1,17 @@
-import { CommentModel } from "../../../entities/comment/model/types";
+import {
+  CommentListApiResponse,
+  commentKeys,
+  useCommentsQuery,
+  useCommentDeleteMutate,
+  useCommentEditMutate,
+} from "../../../entities/comment";
 import { Button } from "../../../shared/ui";
 import { Plus, ThumbsUp, Edit2, Trash2 } from "lucide-react";
 import { highlightText } from "../../../shared/utils/highlight";
-import { useCommentsQuery } from "../../../entities/comment/hooks/use-comments-query";
 import { useModal } from "../../../shared/modal/ModalContext";
 import CommentEditModal from "./CommentEditModal";
 import CommentCreateModal from "./CommentCreateModal";
-import { useCommentDeleteMutate } from "../../../entities/comment/hooks/use-comment-delete-mutate";
 import { useQueryClient } from "@tanstack/react-query";
-import { commentKeys } from "../../../entities/comment/api/comment-keys";
-import { useCommentEditMutate } from "../../../entities/comment/hooks/use-comment-edit-mutate";
-import { CommentListApiResponse } from "../../../entities/comment/api/dto";
 
 interface CommentListProps {
   postId: number;

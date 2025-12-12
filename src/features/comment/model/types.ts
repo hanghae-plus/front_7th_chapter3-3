@@ -1,4 +1,4 @@
-import { AddCommentDto, UpdateCommentDto } from "../../../entities/comment/api/dto";
+import { AddCommentDto, UpdateCommentDto } from "../../../entities/comment";
 
 export type CommentFormData = AddCommentDto;
 

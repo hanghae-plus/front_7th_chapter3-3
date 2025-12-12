@@ -1,5 +1,5 @@
-import { PostModel } from "../../../entities/post/model/types";
-import { UserModel } from "../../../entities/user/model/types";
+import { PostModel } from "../../../entities/post";
+import { UserModel } from "../../../entities/user";
 import { BaseListApiResponse } from "../../../shared/api/types";
 
 export type PostFormData = Pick<PostModel, "title" | "body" | "userId">;

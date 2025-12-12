@@ -3,8 +3,7 @@ import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
 import { useState } from "react";
 import { PostFormData } from "../model/types";
-import { PostModel } from "../../../entities/post/model/types";
-import { usePostEditMutate } from "../../../entities/post/hooks/use-post-edit-mutate";
+import { PostModel, usePostEditMutate } from "../../../entities/post";
 interface PostEditModalProps extends BaseModalProps {
   onClose: () => void;
   selectedPost: PostModel;

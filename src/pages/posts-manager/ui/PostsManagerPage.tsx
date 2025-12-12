@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../shared/ui";
+import { Button, Card, CardContent, CardHeader, CardTitle, Pagination } from "../../../shared/ui";
 import { useModal } from "../../../shared/modal/ModalContext";
-import PostCreateModal from "../../../features/post/ui/PostCreateModal";
-import Pagination from "../../../shared/ui/Pagination";
-import PostTable from "../../../features/post/ui/PostTable";
-import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
-import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
+import { PostCreateModal, PostTable, usePostTableDataQuery } from "../../../features/post";
+import { PostsFilters } from "../../../features/post-filter";
 import { usePostsUrlQuery } from "../../../shared/url-query";
 
 const PostsManager = () => {

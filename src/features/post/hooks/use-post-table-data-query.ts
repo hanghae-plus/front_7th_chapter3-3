@@ -1,14 +1,15 @@
-import { PostListApiResponse } from "../../../entities/post/api/dto";
+import {
+  PostListApiResponse,
+  usePostsQuery,
+  usePostsWithSearchQuery,
+  usePostsWithTagQuery,
+} from "../../../entities/post";
+import { UserListApiResponse, useUsersQuery } from "../../../entities/user";
 import {
   mapPostsUrlQueryParamsToApiParams,
   mapPostsUrlQueryParamsToApiSearchParams,
   mapPostsUrlQueryParamsToApiTagParams,
 } from "../lib/mappers";
-import { usePostsQuery } from "../../../entities/post/hooks/use-posts-query";
-import { usePostsWithSearchQuery } from "../../../entities/post/hooks/use-posts-with-search-query";
-import { usePostsWithTagQuery } from "../../../entities/post/hooks/use-posts-with-tag-query";
-import { UserListApiResponse } from "../../../entities/user/api/dto";
-import { useUsersQuery } from "../../../entities/user/hooks/use-users-query";
 import { PostsUrlQueryParams } from "../../../shared/url-query";
 import { PostTableListData } from "../model/types";
 

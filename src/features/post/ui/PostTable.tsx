@@ -1,14 +1,13 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button } from "../../../shared/ui";
 import { ThumbsUp, ThumbsDown, MessageSquare, Edit2, Trash2 } from "lucide-react";
-import { PostModel } from "../../../entities/post/model/types";
+import { PostModel, usePostDeleteMutate } from "../../../entities/post";
 import { highlightText } from "../../../shared/utils/highlight";
 import { useModal } from "../../../shared/modal/ModalContext";
-import UserModal from "../../user/ui/UserModal";
+import { UserModal } from "../../../features/user";
 import { PostTableData } from "../model/types";
 import PostDetailModal from "./PostDetailModal";
-import CommentList from "../../comment/ui/CommentList";
+import { CommentList } from "../../../features/comment";
 import PostEditModal from "./PostEditModal";
-import { usePostDeleteMutate } from "../../../entities/post/hooks/use-post-delete-mutate";
 
 interface PostTableProps {
   posts: PostTableData[];

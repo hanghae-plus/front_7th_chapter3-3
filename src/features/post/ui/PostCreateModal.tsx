@@ -3,7 +3,7 @@ import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
 import { useState } from "react";
 import { PostFormData } from "../model/types";
-import { usePostAddMutate } from "../../../entities/post/hooks/use-post-add-mutate";
+import { usePostAddMutate } from "../../../entities/post";
 
 interface PostCreateModalProps extends BaseModalProps {
   onClose: () => void;

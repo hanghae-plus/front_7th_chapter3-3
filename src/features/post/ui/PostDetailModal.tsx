@@ -1,6 +1,6 @@
 import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
-import { PostModel } from "../../../entities/post/model/types";
+import { PostModel } from "../../../entities/post";
 import { highlightText } from "../../../shared/utils/highlight";
 interface PostDetailModalProps extends BaseModalProps {
   onClose: () => void;
