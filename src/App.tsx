@@ -1,6 +1,5 @@
 import { BrowserRouter as Router } from "react-router-dom";
-import Header from "./components/Header.tsx";
-import Footer from "./components/Footer.tsx";
+import { Header, Footer } from "./widgets";
 import PostsManagerPage from "./pages/posts-manager/ui/PostsManagerPage.tsx";
 import { PostsUrlQueryProvider } from "./shared/url-query";
 
