@@ -2,7 +2,8 @@ import { useState, useCallback } from "react"
 import { Post } from "@/entities/post/model/post"
 import { User } from "@/entities/user/model/user"
 import { fetchPosts } from "@/entities/post/api/fetch-posts"
-import { fetchPostsByTag } from "@/entities/post/api/fetch-posts-by-tag"
+import { fetchPostsByTag as fetchPostsByTagAPI } from "@/entities/post/api/fetch-posts-by-tag"
+import { searchPosts as searchPostsAPI } from "@/entities/post/api/search-posts"
 
 export const usePosts = () => {
   const [posts, setPosts] = useState<Post[]>([])
@@ -39,33 +40,7 @@ export const usePosts = () => {
     if (!query) return
     setLoading(true)
     try {
-      const data = await searchPosts(query)
-      // Search API often returns posts directly, but we might need to join users if API doesn't return them
-      // Assuming search API returns same structure or we handle it.
-      // If search result structure is different, we might need adjustment.
-      // Based on original code:
-      /*
-        const response = await fetch(`/api/posts/search?q=${searchQuery}`)
-        const data = await response.json()
-        setPosts(data.posts)
-      */
-      // It seems search results didn't join users in original code?
-      // Checking original code...
-      // Original:
-      /*
-        const response = await fetch(`/api/posts/search?q=${searchQuery}`)
-        const data = await response.json()
-        setPosts(data.posts)
-        setTotal(data.total)
-      */
-      // It seems original search didn't join users explicitly? Or maybe it's not needed for search view?
-      // Wait, PostTable needs author. If search doesn't provide author, table crashes or shows empty.
-      // I should probably join users for search too to be safe and consistent.
-
-      // Let's assume we need to join users.
-      // But wait, the original code for searchPosts didn't call fetch users.
-      // Maybe search API returns augmented data? Unlikely for dummyjson.
-      // I will add user joining for consistency.
+      const data = await searchPostsAPI(query)
       const postsWithUsers = await joinPostsWithUsers(data.posts)
       setPosts(postsWithUsers)
       setTotal(data.total)
@@ -78,12 +53,11 @@ export const usePosts = () => {
 
   const fetchPostsByTag = useCallback(async (tag: string) => {
     if (!tag || tag === "all") {
-      // If tag is 'all', we shouldn't really call this, but just in case
       return
     }
     setLoading(true)
     try {
-      const data = await fetchPostsByTag(tag)
+      const data = await fetchPostsByTagAPI(tag)
       const postsWithUsers = await joinPostsWithUsers(data.posts)
       setPosts(postsWithUsers)
       setTotal(data.total)
