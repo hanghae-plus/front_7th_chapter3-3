@@ -2,6 +2,7 @@ import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { getPostsByTagApi } from "../api/post-api";
 import { postsKeys } from "../api/posts-keys";
 import { PostListApiResponse, PostsTagQueryParams } from "../api/dto";
+import { STALE_TIME } from "../../../shared/config/query-config";
 
 interface UsePostsWithTagQueryProps<TQueryFnData, TError = unknown, TData = TQueryFnData> {
   tag: string;
@@ -19,6 +20,7 @@ export function usePostsWithTagQuery<TQueryFnData, TError = unknown, TData = TQu
   return useQuery({
     queryKey: postsKeys.listByTag(tag, params),
     queryFn: () => getPostsByTagApi(tag, params),
+    staleTime: STALE_TIME.DYNAMIC,
     select,
     enabled,
   });
