@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../../components";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui";
 import { BaseModalProps } from "./types";
 
 interface ModalComponentProps extends BaseModalProps {

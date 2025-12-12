@@ -1,4 +1,4 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "../../components";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./primitives";
 
 interface SelectDropdownProps {
   options: { key?: string; label: string; value: string }[];

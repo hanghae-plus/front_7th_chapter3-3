@@ -1,4 +1,4 @@
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button } from "../../../components";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button } from "../../../shared/ui";
 import { ThumbsUp, ThumbsDown, MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { PostModel } from "../../../entities/post/model/types";
 import { highlightText } from "../../../shared/utils/highlight";

@@ -1,4 +1,4 @@
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Button } from "../../components";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Button } from "./primitives";
 
 interface PaginationProps {
   limit: number;

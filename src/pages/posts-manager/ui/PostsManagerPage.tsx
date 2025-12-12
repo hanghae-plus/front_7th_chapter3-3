@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../components";
+import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../shared/ui";
 import { useModal } from "../../../shared/modal/ModalContext";
 import PostCreateModal from "../../../features/post/ui/PostCreateModal";
 import Pagination from "../../../shared/ui/Pagination";

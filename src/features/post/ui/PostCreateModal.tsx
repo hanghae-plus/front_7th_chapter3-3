@@ -1,4 +1,4 @@
-import { Button, Input, Textarea } from "../../../components";
+import { Button, Input, Textarea } from "../../../shared/ui";
 import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
 import { useState } from "react";

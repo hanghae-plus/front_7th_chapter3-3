@@ -1,5 +1,5 @@
 import { CommentModel } from "../../../entities/comment/model/types";
-import { Button } from "../../../components";
+import { Button } from "../../../shared/ui";
 import { Plus, ThumbsUp, Edit2, Trash2 } from "lucide-react";
 import { highlightText } from "../../../shared/utils/highlight";
 import { useCommentsQuery } from "../../../entities/comment/hooks/use-comments-query";

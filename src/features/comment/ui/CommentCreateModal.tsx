@@ -2,7 +2,7 @@ import { BaseModalProps } from "../../../shared/modal/types";
 import ModalComponent from "../../../shared/modal/ModalComponent";
 import { CommentFormData } from "../model/types";
 import { useState } from "react";
-import { Button, Textarea } from "../../../components";
+import { Button, Textarea } from "../../../shared/ui";
 import { useCommentAddMutate } from "../../../entities/comment/hooks/use-comment-add-mutate";
 import { useQueryClient } from "@tanstack/react-query";
 import { commentKeys } from "../../../entities/comment/api/comment-keys";
