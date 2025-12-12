@@ -1,5 +1,9 @@
 import { PostListApiResponse } from "../../../entities/post/api/dto";
-import { mapPostsUrlQueryParamsToApiParams } from "../../../entities/post/api/mappers";
+import {
+  mapPostsUrlQueryParamsToApiParams,
+  mapPostsUrlQueryParamsToApiSearchParams,
+  mapPostsUrlQueryParamsToApiTagParams,
+} from "../../../entities/post/api/mappers";
 import { usePostsQuery } from "../../../entities/post/hooks/use-posts-query";
 import { usePostsWithSearchQuery } from "../../../entities/post/hooks/use-posts-with-search-query";
 import { usePostsWithTagQuery } from "../../../entities/post/hooks/use-posts-with-tag-query";
@@ -13,7 +17,7 @@ interface UsePostTableDataQueryProps {
 }
 
 export function usePostTableDataQuery({ urlQueryParams }: UsePostTableDataQueryProps) {
-  const { tag, search, ...baseQueryParams } = urlQueryParams;
+  const { tag, search, sortBy, sortOrder, ...baseQueryParams } = urlQueryParams;
 
   const postsWithTagEnabled = !!tag && tag !== "all";
   const postsWithSearchEnabled = !!search;
@@ -33,7 +37,25 @@ export function usePostTableDataQuery({ urlQueryParams }: UsePostTableDataQueryP
 
   const apiBaseParams = mapPostsUrlQueryParamsToApiParams({
     ...baseQueryParams,
+    sortBy: sortBy ?? null,
+    sortOrder: sortOrder ?? null,
     tag: null,
+    search: null,
+  });
+
+  const apiSearchParams = mapPostsUrlQueryParamsToApiSearchParams({
+    ...baseQueryParams,
+    search: search ?? null,
+    sortBy: null,
+    sortOrder: null,
+    tag: null,
+  });
+
+  const apiTagParams = mapPostsUrlQueryParamsToApiTagParams({
+    ...baseQueryParams,
+    tag: tag ?? null,
+    sortBy: null,
+    sortOrder: null,
     search: null,
   });
 
@@ -47,12 +69,13 @@ export function usePostTableDataQuery({ urlQueryParams }: UsePostTableDataQueryP
     enabled: postsEnabled,
   });
   const { data: postsWithSearchData, isFetching: isFetchingPostsWithSearch } = usePostsWithSearchQuery({
-    searchQuery: search ?? undefined,
+    params: apiSearchParams,
     select: (data) => postSelect(data, usersData),
     enabled: postsWithSearchEnabled,
   });
   const { data: postsWithTagData, isFetching: isFetchingPostsWithTag } = usePostsWithTagQuery({
-    tag: tag ?? undefined,
+    tag: tag ?? "",
+    params: apiTagParams,
     enabled: postsWithTagEnabled,
     select: (data) => postSelect(data, usersData),
   });

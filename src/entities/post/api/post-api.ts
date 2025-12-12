@@ -71,9 +71,9 @@ export const getPostsBySearchApi = async (params?: PostsSearchQueryParams): Prom
   }
 };
 
-export const getPostsByTagApi = async (params?: PostsTagQueryParams): Promise<PostListApiResponse> => {
+export const getPostsByTagApi = async (tag: string, params?: PostsTagQueryParams): Promise<PostListApiResponse> => {
   try {
-    const response = await fetch(`/api/posts/tag?${new URLSearchParams(params).toString()}`);
+    const response = await fetch(`/api/posts/tag/${tag}?${new URLSearchParams(params).toString()}`);
     const data = await response.json();
     return data;
   } catch (error) {

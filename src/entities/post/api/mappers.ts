@@ -25,7 +25,6 @@ export const mapPostsUrlQueryParamsToApiSearchParams = (params?: PostsUrlQueryPa
 export const mapPostsUrlQueryParamsToApiTagParams = (params?: PostsUrlQueryParams): PostsTagQueryParams => {
   const apiQueryParams: PostsTagQueryParams = {};
 
-  if (params?.tag) apiQueryParams.tag = params.tag;
   if (params?.limit) apiQueryParams.limit = params.limit.toString();
   if (params?.skip) apiQueryParams.skip = params.skip.toString();
 

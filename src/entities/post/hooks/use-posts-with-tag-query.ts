@@ -4,19 +4,21 @@ import { postsKeys } from "../api/posts-keys";
 import { PostListApiResponse, PostsTagQueryParams } from "../api/dto";
 
 interface UsePostsWithTagQueryProps<TQueryFnData, TError = unknown, TData = TQueryFnData> {
+  tag: string;
   params?: PostsTagQueryParams;
   select?: UseQueryOptions<PostListApiResponse, TError, TData>["select"];
   enabled?: boolean;
 }
 
 export function usePostsWithTagQuery<TQueryFnData, TError = unknown, TData = TQueryFnData>({
+  tag,
   params,
   enabled = true,
   select,
 }: UsePostsWithTagQueryProps<TQueryFnData, TError, TData>) {
   return useQuery({
-    queryKey: postsKeys.listByTag(params),
-    queryFn: () => getPostsByTagApi(params),
+    queryKey: postsKeys.listByTag(tag, params),
+    queryFn: () => getPostsByTagApi(tag, params),
     select,
     enabled,
   });

@@ -19,9 +19,7 @@ export type PostsSearchQueryParams = {
   q?: string;
 } & PostsBaseQueryParams;
 
-export type PostsTagQueryParams = {
-  tag?: string;
-} & PostsBaseQueryParams;
+export type PostsTagQueryParams = PostsBaseQueryParams;
 
 export type PostListApiResponse = BaseListApiResponse & {
   posts: PostModel[];

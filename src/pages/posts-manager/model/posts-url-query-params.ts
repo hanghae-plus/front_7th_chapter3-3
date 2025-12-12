@@ -1,4 +1,5 @@
 import { PostsUrlQueryParams } from "./types";
+import { DEFAULT_PAGINATION_SKIP, DEFAULT_PAGINATION_LIMIT } from "./constants";
 
 export function parsePostsUrlQueryParams(searchParams: URLSearchParams): PostsUrlQueryParams {
   const skipRaw = searchParams.get("skip");
@@ -9,8 +10,8 @@ export function parsePostsUrlQueryParams(searchParams: URLSearchParams): PostsUr
   const searchRaw = searchParams.get("search");
 
   return {
-    skip: skipRaw ? Number(skipRaw) : null,
-    limit: limitRaw ? Number(limitRaw) : null,
+    skip: skipRaw ? Number(skipRaw) : DEFAULT_PAGINATION_SKIP,
+    limit: limitRaw ? Number(limitRaw) : DEFAULT_PAGINATION_LIMIT,
     sortBy: sortByRaw ?? null,
     sortOrder: sortOrderRaw === "asc" || sortOrderRaw === "desc" ? sortOrderRaw : null,
     tag: tagRaw ?? null,

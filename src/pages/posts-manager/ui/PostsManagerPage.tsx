@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
-import { useLocation } from "react-router-dom";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../components";
 import { useModal } from "../../../shared/modal/ModalContext";
 import UserModal from "../../../features/user/ui/UserModal";
@@ -27,25 +26,19 @@ import {
   updateCommentApi,
 } from "../../../entities/comment/api/comment-api";
 import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
-import { useUrlSearchParams } from "../../../shared/hooks/use-url-search-params";
-import { usePostFilters } from "../../../features/post-filter/providers/PostFiltersContext";
 import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
-import { usePostsUrlQueryModel } from "../hooks/use-posts-url-query-model";
+import { usePostsUrlQuery } from "../providers/PostsUrlQueryContext";
 
 const PostsManager = () => {
-  // const navigate = useNavigate();
-  const location = useLocation();
-  const { queryParams: urlQueryParams } = useUrlSearchParams();
-  const { searchQuery, sortBy, sortOrder, selectedTag, setSelectedTag } = usePostFilters();
-  const { queryParams, setQueryParams } = usePostsUrlQueryModel();
+  const { queryParams, setQueryParams } = usePostsUrlQuery();
 
   // Modal
   const { openModal } = useModal();
 
   // 상태 관리
   const [posts, setPosts] = useState<PostModel[]>([]);
-  const [skip, setSkip] = useState(parseInt(urlQueryParams.get("skip") || "0"));
-  const [limit, setLimit] = useState(parseInt(urlQueryParams.get("limit") || "10"));
+  const [skip, setSkip] = useState(queryParams.skip || 0);
+  const [limit, setLimit] = useState(queryParams.limit || 10);
 
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
 
@@ -124,11 +117,11 @@ const PostsManager = () => {
       <PostDetailModal
         onClose={close}
         post={post}
-        searchQuery={searchQuery}
+        searchQuery={queryParams.search || ""}
         comment={
           <CommentList
             comments={comments?.[post.id] || []}
-            searchQuery={searchQuery}
+            searchQuery={queryParams.search || ""}
             onClickLikeAction={(comment) => likeComment(comment.id, post.id)}
             onClickEditAction={(comment) => {
               openModal((close) => (
@@ -178,9 +171,9 @@ const PostsManager = () => {
           ) : (
             <PostTable
               posts={postsData?.posts || []}
-              searchQuery={searchQuery}
-              selectedTag={selectedTag}
-              onClickTagAction={(_tag: string) => setSelectedTag(_tag)}
+              searchQuery={queryParams.search || ""}
+              selectedTag={queryParams.tag || ""}
+              onClickTagAction={(_tag: string) => setQueryParams({ tag: _tag })}
               onClickAuthorAction={(_user: UserModel) => openUserModal(_user)}
               onClickDetailAction={(_post: PostModel) => openPostDetail(_post)}
               onClickEditAction={(_post: PostModel) =>

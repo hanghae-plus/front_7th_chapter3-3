@@ -1,21 +1,23 @@
 import PostsSearchBar from "./PostsSearchBar";
 import SelectDropdown from "../../../shared/ui/SelectDropdown";
 import { useTagsQuery } from "../../../entities/post/hooks/use-tags-query";
-import { usePostFilters } from "../providers/PostFiltersContext";
+import { usePostsUrlQuery } from "../../../pages/posts-manager/providers/PostsUrlQueryContext";
 
 export default function PostsFilters() {
-  const { searchQuery, setSearchQuery, sortBy, setSortBy, sortOrder, setSortOrder, selectedTag, setSelectedTag } =
-    usePostFilters();
+  const { queryParams, setQueryParams } = usePostsUrlQuery();
 
   const { data: tags } = useTagsQuery();
 
   return (
     <div className="flex gap-4">
-      <PostsSearchBar searchQuery={searchQuery} onEnter={(value) => setSearchQuery(value)} />
+      <PostsSearchBar
+        searchQuery={queryParams.search || ""}
+        onEnter={(value) => setQueryParams({ search: value, tag: null, sortBy: null, sortOrder: null })}
+      />
       <SelectDropdown
         options={tags?.map((tag) => ({ label: tag.slug, value: tag.slug, key: tag.url })) || []}
-        value={selectedTag}
-        onChange={setSelectedTag}
+        value={queryParams.tag ?? ""}
+        onChange={(value) => setQueryParams({ tag: value, search: null, sortBy: null, sortOrder: null })}
         placeholder="태그 선택"
       />
       <SelectDropdown
@@ -25,8 +27,8 @@ export default function PostsFilters() {
           { label: "제목", value: "title" },
           { label: "반응", value: "reactions" },
         ]}
-        value={sortBy}
-        onChange={setSortBy}
+        value={queryParams.sortBy || ""}
+        onChange={(value) => setQueryParams({ sortBy: value, tag: null, search: null })}
         placeholder="정렬 기준"
       />
       <SelectDropdown
@@ -34,8 +36,8 @@ export default function PostsFilters() {
           { label: "오름차순", value: "asc" },
           { label: "내림차순", value: "desc" },
         ]}
-        value={sortOrder}
-        onChange={setSortOrder}
+        value={queryParams.sortOrder || ""}
+        onChange={(value) => setQueryParams({ sortOrder: value as "asc" | "desc", tag: null, search: null })}
         placeholder="정렬 순서"
       />
     </div>
