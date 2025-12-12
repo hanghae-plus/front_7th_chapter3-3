@@ -4,17 +4,23 @@ import { BaseModalProps } from "../../../shared/modal/types";
 import { useState } from "react";
 import { PostFormData } from "../model/types";
 import { PostModel } from "../../../entities/post/model/types";
+import { usePostEditMutate } from "../../../entities/post/hooks/use-post-edit-mutate";
 interface PostEditModalProps extends BaseModalProps {
   onClose: () => void;
-  updatePost: (postId: number, postForm: PostFormData) => void;
   selectedPost: PostModel;
 }
 
-export default function PostEditModal({ onClose, updatePost, selectedPost }: PostEditModalProps) {
+export default function PostEditModal({ onClose, selectedPost }: PostEditModalProps) {
   const [postForm, setPostForm] = useState<PostFormData>({
     title: selectedPost?.title || "",
     body: selectedPost?.body || "",
     userId: selectedPost?.userId || 1,
+  });
+
+  const { mutateAsync: updatePostMutation } = usePostEditMutate({
+    onSuccess: () => {
+      onClose();
+    },
   });
 
   return (
@@ -31,14 +37,7 @@ export default function PostEditModal({ onClose, updatePost, selectedPost }: Pos
           value={postForm?.body || ""}
           onChange={(e) => setPostForm({ ...selectedPost, body: e.target.value })}
         />
-        <Button
-          onClick={() => {
-            updatePost(selectedPost.id, postForm);
-            onClose();
-          }}
-        >
-          게시물 업데이트
-        </Button>
+        <Button onClick={() => updatePostMutation({ postId: selectedPost.id, ...postForm })}>게시물 업데이트</Button>
       </div>
     </ModalComponent>
   );

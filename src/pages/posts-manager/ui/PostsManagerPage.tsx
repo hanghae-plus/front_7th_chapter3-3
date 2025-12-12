@@ -7,7 +7,6 @@ import PostCreateModal from "../../../features/post/ui/PostCreateModal";
 import PostEditModal from "../../../features/post/ui/PostEditModal";
 import PostDetailModal from "../../../features/post/ui/PostDetailModal";
 import CommentCreateModal from "../../../features/comment/ui/CommentCreateModal";
-import { PostFormData } from "../../../features/post/model/types";
 import { PostModel } from "../../../entities/post/model/types";
 import { CommentFormData, UpdateCommentFormData } from "../../../features/comment/model/types";
 import CommentEditModal from "../../../features/comment/ui/CommentEditModal";
@@ -17,7 +16,6 @@ import PostTable from "../../../features/post/ui/PostTable";
 import CommentList from "../../../features/comment/ui/CommentList";
 import { CommentModel } from "../../../entities/comment/model/types";
 import { getUserApi } from "../../../entities/user/api/user-api";
-import { addPostApi, deletePostApi, updatePostApi } from "../../../entities/post/api/post-api";
 import {
   addCommentApi,
   deleteCommentApi,
@@ -28,6 +26,7 @@ import {
 import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
 import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
 import { usePostsUrlQuery } from "../providers/PostsUrlQueryContext";
+import { usePostDeleteMutate } from "../../../entities/post/hooks/use-post-delete-mutate";
 
 const PostsManager = () => {
   const { queryParams, setQueryParams } = usePostsUrlQuery();
@@ -36,29 +35,12 @@ const PostsManager = () => {
   const { openModal } = useModal();
 
   // 상태 관리
-  const [posts, setPosts] = useState<PostModel[]>([]);
   const [skip, setSkip] = useState(queryParams.skip || 0);
   const [limit, setLimit] = useState(queryParams.limit || 10);
 
   const [comments, setComments] = useState<Record<string, CommentModel[]>>({});
 
-  // 게시물 추가
-  const addPost = async (postForm: PostFormData) => {
-    const postData = await addPostApi(postForm);
-    setPosts([postData, ...posts]);
-  };
-
-  // 게시물 업데이트
-  const updatePost = async (postId: number, postForm: PostFormData) => {
-    const postData = await updatePostApi(postId, postForm);
-    setPosts(posts.map((post) => (post.id === postData.id ? postData : post)));
-  };
-
-  // 게시물 삭제
-  const deletePost = async (postId: number) => {
-    await deletePostApi(postId);
-    setPosts(posts.filter((post) => post.id !== postId));
-  };
+  const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
 
   // 댓글 가져오기
   const fetchComments = async (postId: number) => {
@@ -158,7 +140,7 @@ const PostsManager = () => {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <span>게시물 관리자</span>
-          <Button onClick={() => openModal((close) => <PostCreateModal onClose={close} addPost={addPost} />)}>
+          <Button onClick={() => openModal((close) => <PostCreateModal onClose={close} />)}>
             <Plus className="w-4 h-4 mr-2" />
             게시물 추가
           </Button>
@@ -181,9 +163,9 @@ const PostsManager = () => {
               onClickAuthorAction={(_user: UserModel) => openUserModal(_user)}
               onClickDetailAction={(_post: PostModel) => openPostDetail(_post)}
               onClickEditAction={(_post: PostModel) =>
-                openModal((close) => <PostEditModal onClose={close} selectedPost={_post} updatePost={updatePost} />)
+                openModal((close) => <PostEditModal onClose={close} selectedPost={_post} />)
               }
-              onClickDeleteAction={(_post: PostModel) => deletePost(_post.id)}
+              onClickDeleteAction={(_post: PostModel) => deletePostMutation({ postId: _post.id })}
             />
           )}
 

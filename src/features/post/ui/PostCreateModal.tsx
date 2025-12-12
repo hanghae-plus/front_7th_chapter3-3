@@ -3,17 +3,23 @@ import ModalComponent from "../../../shared/modal/ModalComponent";
 import { BaseModalProps } from "../../../shared/modal/types";
 import { useState } from "react";
 import { PostFormData } from "../model/types";
+import { usePostAddMutate } from "../../../entities/post/hooks/use-post-add-mutate";
 
 interface PostCreateModalProps extends BaseModalProps {
   onClose: () => void;
-  addPost: (postForm: PostFormData) => void;
 }
 
-export default function PostCreateModal({ onClose, addPost }: PostCreateModalProps) {
+export default function PostCreateModal({ onClose }: PostCreateModalProps) {
   const [postForm, setPostForm] = useState<PostFormData>({
     title: "",
     body: "",
     userId: 1,
+  });
+
+  const { mutateAsync: addPostMutation } = usePostAddMutate({
+    onSuccess: () => {
+      onClose();
+    },
   });
 
   return (
@@ -36,14 +42,7 @@ export default function PostCreateModal({ onClose, addPost }: PostCreateModalPro
           value={postForm.userId}
           onChange={(e) => setPostForm({ ...postForm, userId: Number(e.target.value) })}
         />
-        <Button
-          onClick={() => {
-            addPost(postForm);
-            onClose();
-          }}
-        >
-          게시물 추가
-        </Button>
+        <Button onClick={() => addPostMutation(postForm)}>게시물 추가</Button>
       </div>
     </ModalComponent>
   );
