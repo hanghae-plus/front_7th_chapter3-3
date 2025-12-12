@@ -34,8 +34,8 @@ import {
   useDeleteCommentMutation,
   useLikeCommentMutation,
 } from "../entities/comments/model"
-import { useUserList, useUserDetail } from "../entities/users/model"
-import { User } from "../entities/users/types"
+import { useUserList } from "../entities/users/model"
+import { UserDetailModal } from "../widgets/user-detail/ui/UserDetailModal"
 import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
 import { usePostSearchFilter } from "../features/search-filter-post/model"
 
@@ -76,7 +76,7 @@ const PostsManager = () => {
   const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
   const [selectedPostIdForComments, setSelectedPostIdForComments] = useState<number | null>(null)
 
   // Queries
@@ -115,9 +115,6 @@ const PostsManager = () => {
   // 댓글 쿼리
   const { data: commentsData } = useCommentList(selectedPostIdForComments || 0)
   const comments = commentsData?.comments || []
-
-  // 사용자 상세 정보
-  const { data: userDetailData } = useUserDetail(selectedUser?.id || 0)
 
   // Mutations
   const createPostMutationHook = useCreatePostMutation({
@@ -216,16 +213,9 @@ const PostsManager = () => {
 
   // 사용자 모달 열기
   const openUserModal = (user: any) => {
-    setSelectedUser(user)
+    setSelectedUserId(user?.id || null)
     setShowUserModal(true)
   }
-
-  // 사용자 상세 정보 업데이트
-  useEffect(() => {
-    if (userDetailData) {
-      setSelectedUser(userDetailData)
-    }
-  }, [userDetailData])
 
   // skip, limit 변경 시 URL 업데이트
   useEffect(() => {
@@ -549,45 +539,9 @@ const PostsManager = () => {
       </Dialog>
 
       {/* 사용자 모달 */}
-      <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>사용자 정보</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <img
-              src={userDetailData?.image || selectedUser?.image}
-              alt={userDetailData?.username || selectedUser?.username}
-              className="w-24 h-24 rounded-full mx-auto"
-            />
-            <h3 className="text-xl font-semibold text-center">{userDetailData?.username || selectedUser?.username}</h3>
-            <div className="space-y-2">
-              <p>
-                <strong>이름:</strong> {userDetailData?.firstName || selectedUser?.firstName}{" "}
-                {userDetailData?.lastName || selectedUser?.lastName}
-              </p>
-              <p>
-                <strong>나이:</strong> {userDetailData?.age || selectedUser?.age}
-              </p>
-              <p>
-                <strong>이메일:</strong> {userDetailData?.email || selectedUser?.email}
-              </p>
-              <p>
-                <strong>전화번호:</strong> {userDetailData?.phone || selectedUser?.phone}
-              </p>
-              <p>
-                <strong>주소:</strong> {userDetailData?.address?.address || selectedUser?.address?.address},{" "}
-                {userDetailData?.address?.city || selectedUser?.address?.city},{" "}
-                {userDetailData?.address?.state || selectedUser?.address?.state}
-              </p>
-              <p>
-                <strong>직장:</strong> {userDetailData?.company?.name || selectedUser?.company?.name} -{" "}
-                {userDetailData?.company?.title || selectedUser?.company?.title}
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {selectedUserId && (
+        <UserDetailModal open={showUserModal} onOpenChange={setShowUserModal} userId={selectedUserId} />
+      )}
     </Card>
   )
 }

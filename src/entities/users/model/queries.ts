@@ -14,8 +14,5 @@ export const useUserList = (limit: number, filters: string) => {
 }
 
 export const useUserDetail = (id: number) => {
-  return useQuery({
-    ...userQueries.detail(id),
-    enabled: id > 0,
-  })
+  return useQuery(userQueries.detail(id))
 }

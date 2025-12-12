@@ -10,7 +10,7 @@ export const userQueries = {
 
   list: (limit: number, filters: string) =>
     queryOptions({
-      queryKey: [...userQueries.lists(), filters],
+      queryKey: [...userQueries.lists(), limit, filters],
       queryFn: () => fetchUsers(limit, filters),
     }),
 
@@ -18,5 +18,6 @@ export const userQueries = {
     queryOptions({
       queryKey: [...userQueries.details(), id],
       queryFn: () => fetchUserById(id),
+      enabled: id > 0,
     }),
 }
