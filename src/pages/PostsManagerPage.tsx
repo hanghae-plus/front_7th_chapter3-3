@@ -22,19 +22,15 @@ import {
 } from "../shared/components/ui"
 import { usePostList, usePostTags, usePostSearch, usePostByTag } from "../entities/posts/model"
 import { useCreatePostMutation, useUpdatePostMutation, useDeletePostMutation } from "../entities/posts/model/mutations"
-import {
-  useCommentList,
-  useCreateCommentMutation,
-  useUpdateCommentMutation,
-  useDeleteCommentMutation,
-  useLikeCommentMutation,
-} from "../entities/comments/model"
+import { useCreateCommentMutation, useUpdateCommentMutation } from "../entities/comments/model"
 import { useUserList } from "../entities/users/model"
 import { UserDetailModal } from "../widgets/user-detail/ui/UserDetailModal"
+import { PostDetailModal } from "../widgets/post-detail/ui/PostDetailModal"
 import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
 import { usePostSearchFilter } from "../features/search-filter-post/model"
 import { PaginationControl } from "../features/control-pagination/ui"
 import { CommentAddModal, CommentEditModal } from "../features/control-comments/ui"
+import { highlightText } from "../shared/utils/highlightText"
 
 const PostsManager = () => {
   const location = useLocation()
@@ -104,10 +100,6 @@ const PostsManager = () => {
 
   const total = currentPostsData?.total || 0
 
-  // 댓글 쿼리
-  const { data: commentsData } = useCommentList(selectedPostIdForComments || 0)
-  const comments = commentsData?.comments || []
-
   // Mutations
   const createPostMutationHook = useCreatePostMutation({
     onSuccess: () => {
@@ -137,10 +129,6 @@ const PostsManager = () => {
       setSelectedComment(null)
     },
   })
-
-  const deleteCommentMutation = useDeleteCommentMutation(selectedPostIdForComments || 0)
-
-  const likeCommentMutation = useLikeCommentMutation(selectedPostIdForComments || 0)
 
   // URL 업데이트 함수 (skip, limit 포함)
   const updateURL = () => {
@@ -180,19 +168,6 @@ const PostsManager = () => {
     updateCommentMutation.mutate({ id, body })
   }
 
-  // 댓글 삭제
-  const deleteComment = (id: number) => {
-    deleteCommentMutation.mutate(id)
-  }
-
-  // 댓글 좋아요
-  const likeComment = (id: number) => {
-    const comment = comments.find((c: any) => c.id === id)
-    if (!comment) return
-    const newLikes = comment.likes + 1
-    likeCommentMutation.mutate({ id, likes: newLikes })
-  }
-
   // 게시물 상세 보기
   const openPostDetail = (post: any) => {
     setSelectedPost(post)
@@ -217,21 +192,6 @@ const PostsManager = () => {
     setSkip(parseInt(params.get("skip") || "0"))
     setLimit(parseInt(params.get("limit") || "10"))
   }, [location.search])
-
-  // 하이라이트 함수 추가
-  const highlightText = (text: string, highlight: string) => {
-    if (!text) return null
-    if (!highlight.trim()) {
-      return <span>{text}</span>
-    }
-    const regex = new RegExp(`(${highlight})`, "gi")
-    const parts = text.split(regex)
-    return (
-      <span>
-        {parts.map((part, i) => (regex.test(part) ? <mark key={i}>{part}</mark> : <span key={i}>{part}</span>))}
-      </span>
-    )
-  }
 
   // 게시물 테이블 렌더링
   const renderPostTable = () => (
@@ -311,54 +271,6 @@ const PostsManager = () => {
         ))}
       </TableBody>
     </Table>
-  )
-
-  // 댓글 렌더링
-  const renderComments = (postId: number) => (
-    <div className="mt-2">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold">댓글</h3>
-        <Button
-          size="sm"
-          onClick={() => {
-            setSelectedPostIdForComments(postId)
-            setShowAddCommentDialog(true)
-          }}
-        >
-          <Plus className="w-3 h-3 mr-1" />
-          댓글 추가
-        </Button>
-      </div>
-      <div className="space-y-1">
-        {comments.map((comment: any) => (
-          <div key={comment.id} className="flex items-center justify-between text-sm border-b pb-1">
-            <div className="flex items-center space-x-2 overflow-hidden">
-              <span className="font-medium truncate">{comment.user.username}:</span>
-              <span className="truncate">{highlightText(comment.body, searchQuery)}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <Button variant="ghost" size="sm" onClick={() => likeComment(comment.id)}>
-                <ThumbsUp className="w-3 h-3" />
-                <span className="ml-1 text-xs">{comment.likes}</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setSelectedComment(comment)
-                  setShowEditCommentDialog(true)
-                }}
-              >
-                <Edit2 className="w-3 h-3" />
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => deleteComment(comment.id)}>
-                <Trash2 className="w-3 h-3" />
-              </Button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
   )
 
   return (
@@ -475,17 +387,14 @@ const PostsManager = () => {
       />
 
       {/* 게시물 상세 보기 대화상자 */}
-      <Dialog open={showPostDetailDialog} onOpenChange={setShowPostDetailDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>{highlightText(selectedPost?.title, searchQuery)}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>{highlightText(selectedPost?.body, searchQuery)}</p>
-            {renderComments(selectedPost?.id)}
-          </div>
-        </DialogContent>
-      </Dialog>
+      {selectedPost && (
+        <PostDetailModal
+          post={selectedPost}
+          open={showPostDetailDialog}
+          onOpenChange={setShowPostDetailDialog}
+          searchQuery={searchQuery}
+        />
+      )}
 
       {/* 사용자 모달 */}
       {selectedUserId && (

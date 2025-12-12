@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/components"
 
-interface CommentAddModalProps {
+type CommentAddModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   postId: number | null

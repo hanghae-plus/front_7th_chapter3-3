@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/components"
 
-interface CommentEditModalProps {
+type CommentEditModalProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
   comment: { id: number; body: string } | null

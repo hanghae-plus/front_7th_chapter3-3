@@ -10,5 +10,6 @@ export const commentQueries = {
     queryOptions({
       queryKey: [...commentQueries.lists(), postId],
       queryFn: () => fetchComments(postId),
+      enabled: postId > 0,
     }),
 }
