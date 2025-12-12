@@ -1,7 +1,8 @@
 import { Comment, CommentsResponse } from "../model/types"
+import { API_BASE_URL } from "@/shared/config/api"
 
 export const fetchComments = async (postId: number): Promise<CommentsResponse> => {
-  const response = await fetch(`/api/comments/post/${postId}`)
+  const response = await fetch(`${API_BASE_URL}/comments/post/${postId}`)
   return response.json()
 }
 
@@ -10,7 +11,7 @@ export const createComment = async (comment: {
   postId: number
   userId: number
 }): Promise<Comment> => {
-  const response = await fetch("/api/comments/add", {
+  const response = await fetch(`${API_BASE_URL}/comments/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(comment),
@@ -19,7 +20,7 @@ export const createComment = async (comment: {
 }
 
 export const updateComment = async (id: number, body: string): Promise<Comment> => {
-  const response = await fetch(`/api/comments/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ body }),
@@ -28,13 +29,13 @@ export const updateComment = async (id: number, body: string): Promise<Comment> 
 }
 
 export const deleteComment = async (id: number): Promise<void> => {
-  await fetch(`/api/comments/${id}`, {
+  await fetch(`${API_BASE_URL}/comments/${id}`, {
     method: "DELETE",
   })
 }
 
 export const likeComment = async (id: number, currentLikes: number): Promise<Comment> => {
-  const response = await fetch(`/api/comments/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/comments/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ likes: currentLikes + 1 }),

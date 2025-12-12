@@ -1,4 +1,5 @@
 import { Post, PostsResponse } from "../model/types"
+import { API_BASE_URL } from "@/shared/config/api"
 
 export const fetchPosts = async (params: {
   limit: number
@@ -19,22 +20,22 @@ export const fetchPosts = async (params: {
     }
   }
 
-  const response = await fetch(`/api/posts?${queryParams.toString()}`)
+  const response = await fetch(`${API_BASE_URL}/posts?${queryParams.toString()}`)
   return response.json()
 }
 
 export const fetchPostsByTag = async (tag: string): Promise<PostsResponse> => {
-  const response = await fetch(`/api/posts/tag/${tag}`)
+  const response = await fetch(`${API_BASE_URL}/posts/tag/${tag}`)
   return response.json()
 }
 
 export const searchPosts = async (query: string): Promise<PostsResponse> => {
-  const response = await fetch(`/api/posts/search?q=${query}`)
+  const response = await fetch(`${API_BASE_URL}/posts/search?q=${query}`)
   return response.json()
 }
 
 export const createPost = async (post: { title: string; body: string; userId: number }): Promise<Post> => {
-  const response = await fetch("/api/posts/add", {
+  const response = await fetch(`${API_BASE_URL}/posts/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(post),
@@ -43,7 +44,7 @@ export const createPost = async (post: { title: string; body: string; userId: nu
 }
 
 export const updatePost = async (id: number, post: Partial<Post>): Promise<Post> => {
-  const response = await fetch(`/api/posts/${id}`, {
+  const response = await fetch(`${API_BASE_URL}/posts/${id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(post),
@@ -52,7 +53,7 @@ export const updatePost = async (id: number, post: Partial<Post>): Promise<Post>
 }
 
 export const deletePost = async (id: number): Promise<void> => {
-  await fetch(`/api/posts/${id}`, {
+  await fetch(`${API_BASE_URL}/posts/${id}`, {
     method: "DELETE",
   })
 }
