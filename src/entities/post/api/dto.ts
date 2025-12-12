@@ -9,7 +9,7 @@ export type PostGetQueryParams = {
   limit?: string;
   skip?: string;
   sortBy?: string;
-  sortOrder?: string;
+  sortOrder?: "asc" | "desc";
 };
 
 export type PostListApiResponse = BaseListApiResponse & {

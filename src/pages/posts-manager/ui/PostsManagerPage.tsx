@@ -30,12 +30,14 @@ import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
 import { useUrlSearchParams } from "../../../shared/hooks/use-url-search-params";
 import { usePostFilters } from "../../../features/post-filter/providers/PostFiltersContext";
 import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
+import { usePostsUrlQueryModel } from "../hooks/use-posts-url-query-model";
 
 const PostsManager = () => {
   // const navigate = useNavigate();
   const location = useLocation();
   const { queryParams: urlQueryParams } = useUrlSearchParams();
   const { searchQuery, sortBy, sortOrder, selectedTag, setSelectedTag } = usePostFilters();
+  const { queryParams, setQueryParams } = usePostsUrlQueryModel();
 
   // Modal
   const { openModal } = useModal();
@@ -149,24 +151,10 @@ const PostsManager = () => {
     openModal((close) => <UserModal user={userData} onClose={close} />);
   };
 
+  // Data Query
   const { loading, data: postsData } = usePostTableDataQuery({
-    skip,
-    limit,
-    sortBy,
-    sortOrder,
-    selectedTag,
-    searchQuery,
+    urlQueryParams: queryParams,
   });
-
-  useEffect(() => {
-    // const params = new URLSearchParams(location.search);
-    setSkip(parseInt(urlQueryParams.get("skip") || "0"));
-    setLimit(parseInt(urlQueryParams.get("limit") || "10"));
-    // setSearchQuery(params.get("search") || "");
-    // setSortBy(params.get("sortBy") || "");
-    // setSortOrder(params.get("sortOrder") || "asc");
-    // setSelectedTag(params.get("tag") || "");
-  }, [location.search]);
 
   return (
     <Card className="w-full max-w-6xl mx-auto">

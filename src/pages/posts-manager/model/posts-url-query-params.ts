@@ -8,30 +8,25 @@ export function parsePostsUrlQueryParams(searchParams: URLSearchParams): PostsUr
   const tagRaw = searchParams.get("tag");
   const searchRaw = searchParams.get("search");
 
-  const skip = skipRaw ? parseInt(skipRaw) : undefined;
-  const limit = limitRaw ? parseInt(limitRaw) : undefined;
-  const sortBy = sortByRaw ? sortByRaw : undefined;
-  const sortOrder = sortOrderRaw === "asc" ? "asc" : sortOrderRaw === "desc" ? "desc" : undefined;
-  const tag = tagRaw ? tagRaw : undefined;
-  const search = searchRaw ? searchRaw : undefined;
-
   return {
-    skip,
-    limit,
-    sortBy,
-    sortOrder,
-    tag,
-    search,
+    skip: skipRaw ? Number(skipRaw) : null,
+    limit: limitRaw ? Number(limitRaw) : null,
+    sortBy: sortByRaw ?? null,
+    sortOrder: sortOrderRaw === "asc" || sortOrderRaw === "desc" ? sortOrderRaw : null,
+    tag: tagRaw ?? null,
+    search: searchRaw ?? null,
   };
 }
 
 export function buildPostsUrlQueryParams(params: PostsUrlQueryParams): URLSearchParams {
   const searchParams = new URLSearchParams();
-  if (params.skip) searchParams.set("skip", params.skip.toString());
-  if (params.limit) searchParams.set("limit", params.limit.toString());
-  if (params.sortBy) searchParams.set("sortBy", params.sortBy);
-  if (params.sortOrder) searchParams.set("sortOrder", params.sortOrder);
-  if (params.tag) searchParams.set("tag", params.tag);
-  if (params.search) searchParams.set("search", params.search);
+
+  if (params.skip !== null) searchParams.set("skip", params.skip.toString());
+  if (params.limit !== null) searchParams.set("limit", params.limit.toString());
+  if (params.sortBy !== null) searchParams.set("sortBy", params.sortBy);
+  if (params.sortOrder !== null) searchParams.set("sortOrder", params.sortOrder);
+  if (params.tag !== null) searchParams.set("tag", params.tag);
+  if (params.search !== null) searchParams.set("search", params.search);
+
   return searchParams;
 }

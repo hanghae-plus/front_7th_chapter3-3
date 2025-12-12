@@ -10,7 +10,7 @@ interface UsePostsQueryProps<TQueryFnData, TError = unknown, TData = TQueryFnDat
 }
 
 export function usePostsQuery<TQueryFnData, TError = unknown, TData = TQueryFnData>({
-  params = {},
+  params,
   select,
   enabled = true,
 }: UsePostsQueryProps<TQueryFnData, TError, TData>) {

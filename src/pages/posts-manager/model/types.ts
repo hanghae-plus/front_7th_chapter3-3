@@ -1,8 +1,8 @@
 export type PostsUrlQueryParams = {
-  skip?: number;
-  limit?: number;
-  sortBy?: string;
-  sortOrder?: "asc" | "desc";
-  tag?: string;
-  search?: string;
+  skip: number | null;
+  limit: number | null;
+  sortBy: string | null;
+  sortOrder: "asc" | "desc" | null;
+  tag: string | null;
+  search: string | null;
 };
