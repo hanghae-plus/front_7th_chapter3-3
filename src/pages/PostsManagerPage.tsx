@@ -22,14 +22,12 @@ import {
 } from "../shared/components/ui"
 import { usePostList, usePostTags, usePostSearch, usePostByTag } from "../entities/posts/model"
 import { useCreatePostMutation, useUpdatePostMutation, useDeletePostMutation } from "../entities/posts/model/mutations"
-import { useCreateCommentMutation, useUpdateCommentMutation } from "../entities/comments/model"
 import { useUserList } from "../entities/users/model"
 import { UserDetailModal } from "../widgets/user-detail/ui/UserDetailModal"
 import { PostDetailModal } from "../widgets/post-detail/ui/PostDetailModal"
 import { PostSearchFilterBar } from "../features/search-filter-post/ui/PostSearchFilterBar"
 import { usePostSearchFilter } from "../features/search-filter-post/model"
 import { PaginationControl } from "../features/control-pagination/ui"
-import { CommentAddModal, CommentEditModal } from "../features/control-comments/ui"
 import { highlightText } from "../shared/utils/highlightText"
 
 const PostsManager = () => {
@@ -59,13 +57,9 @@ const PostsManager = () => {
   const [showAddDialog, setShowAddDialog] = useState(false)
   const [showEditDialog, setShowEditDialog] = useState(false)
   const [newPost, setNewPost] = useState({ title: "", body: "", userId: 1 })
-  const [selectedComment, setSelectedComment] = useState<any>(null)
-  const [showAddCommentDialog, setShowAddCommentDialog] = useState(false)
-  const [showEditCommentDialog, setShowEditCommentDialog] = useState(false)
   const [showPostDetailDialog, setShowPostDetailDialog] = useState(false)
   const [showUserModal, setShowUserModal] = useState(false)
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null)
-  const [selectedPostIdForComments, setSelectedPostIdForComments] = useState<number | null>(null)
 
   // Queries
   const { data: tagsData } = usePostTags()
@@ -117,19 +111,6 @@ const PostsManager = () => {
 
   const deletePostMutationHook = useDeletePostMutation()
 
-  const createCommentMutation = useCreateCommentMutation(selectedPostIdForComments || 0, {
-    onSuccess: () => {
-      setShowAddCommentDialog(false)
-    },
-  })
-
-  const updateCommentMutation = useUpdateCommentMutation(selectedPostIdForComments || 0, {
-    onSuccess: () => {
-      setShowEditCommentDialog(false)
-      setSelectedComment(null)
-    },
-  })
-
   // URL 업데이트 함수 (skip, limit 포함)
   const updateURL = () => {
     updateFilterURL(undefined, {
@@ -154,24 +135,9 @@ const PostsManager = () => {
     deletePostMutationHook.mutate(id)
   }
 
-  // 댓글 추가
-  const handleAddComment = (body: string, postId: number, userId: number) => {
-    createCommentMutation.mutate({
-      body,
-      postId,
-      userId,
-    })
-  }
-
-  // 댓글 업데이트
-  const handleUpdateComment = (id: number, body: string) => {
-    updateCommentMutation.mutate({ id, body })
-  }
-
   // 게시물 상세 보기
   const openPostDetail = (post: any) => {
     setSelectedPost(post)
-    setSelectedPostIdForComments(post.id)
     setShowPostDetailDialog(true)
   }
 
@@ -368,23 +334,6 @@ const PostsManager = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* 댓글 추가 대화상자 */}
-      <CommentAddModal
-        open={showAddCommentDialog}
-        onOpenChange={setShowAddCommentDialog}
-        postId={selectedPostIdForComments}
-        userId={1}
-        onSubmit={handleAddComment}
-      />
-
-      {/* 댓글 수정 대화상자 */}
-      <CommentEditModal
-        open={showEditCommentDialog}
-        onOpenChange={setShowEditCommentDialog}
-        comment={selectedComment}
-        onSubmit={handleUpdateComment}
-      />
 
       {/* 게시물 상세 보기 대화상자 */}
       {selectedPost && (

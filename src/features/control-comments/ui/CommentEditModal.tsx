@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, Textarea } from "../../../shared/components"
 
 type CommentEditModalProps = {
@@ -22,6 +22,12 @@ export function CommentEditModal({ open, onOpenChange, comment, onSubmit }: Comm
     }
     onOpenChange(newOpen)
   }
+
+  useEffect(() => {
+    if (comment) {
+      setBody(comment.body)
+    }
+  }, [comment])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
