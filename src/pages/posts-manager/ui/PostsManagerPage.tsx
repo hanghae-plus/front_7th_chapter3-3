@@ -2,20 +2,12 @@ import { useEffect, useState } from "react";
 import { Plus } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle } from "../../../components";
 import { useModal } from "../../../shared/modal/ModalContext";
-import UserModal from "../../../features/user/ui/UserModal";
 import PostCreateModal from "../../../features/post/ui/PostCreateModal";
-import PostEditModal from "../../../features/post/ui/PostEditModal";
-import PostDetailModal from "../../../features/post/ui/PostDetailModal";
-import { PostModel } from "../../../entities/post/model/types";
 import Pagination from "../../../shared/ui/Pagination";
-import { UserModel } from "../../../entities/user/model/types";
 import PostTable from "../../../features/post/ui/PostTable";
-import CommentList from "../../../features/comment/ui/CommentList";
-import { getUserApi } from "../../../entities/user/api/user-api";
 import PostsFilters from "../../../features/post-filter/ui/PostsFilters";
 import { usePostTableDataQuery } from "../../../features/post/hooks/use-post-table-data-query";
 import { usePostsUrlQuery } from "../providers/PostsUrlQueryContext";
-import { usePostDeleteMutate } from "../../../entities/post/hooks/use-post-delete-mutate";
 
 const PostsManager = () => {
   const { queryParams, setQueryParams } = usePostsUrlQuery();
@@ -26,26 +18,6 @@ const PostsManager = () => {
   // 상태 관리
   const [skip, setSkip] = useState(queryParams.skip || 0);
   const [limit, setLimit] = useState(queryParams.limit || 10);
-
-  const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
-
-  // 게시물 상세 보기
-  const openPostDetail = (post: PostModel) => {
-    openModal((close) => (
-      <PostDetailModal
-        onClose={close}
-        post={post}
-        searchQuery={queryParams.search || ""}
-        comment={<CommentList postId={post.id} searchQuery={queryParams.search || ""} />}
-      />
-    ));
-  };
-
-  // 사용자 모달 열기
-  const openUserModal = async (user: UserModel) => {
-    const userData = await getUserApi(user.id);
-    openModal((close) => <UserModal user={userData} onClose={close} />);
-  };
 
   // Data Query
   const { loading, data: postsData } = usePostTableDataQuery({
@@ -80,13 +52,6 @@ const PostsManager = () => {
               posts={postsData?.posts || []}
               searchQuery={queryParams.search || ""}
               selectedTag={queryParams.tag || ""}
-              onClickTagAction={(_tag: string) => setQueryParams({ tag: _tag })}
-              onClickAuthorAction={(_user: UserModel) => openUserModal(_user)}
-              onClickDetailAction={(_post: PostModel) => openPostDetail(_post)}
-              onClickEditAction={(_post: PostModel) =>
-                openModal((close) => <PostEditModal onClose={close} selectedPost={_post} />)
-              }
-              onClickDeleteAction={(_post: PostModel) => deletePostMutation({ postId: _post.id })}
             />
           )}
 

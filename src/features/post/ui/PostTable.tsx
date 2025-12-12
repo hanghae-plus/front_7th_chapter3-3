@@ -1,29 +1,36 @@
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell, Button } from "../../../components";
 import { ThumbsUp, ThumbsDown, MessageSquare, Edit2, Trash2 } from "lucide-react";
 import { PostModel } from "../../../entities/post/model/types";
-import { UserModel } from "../../../entities/user/model/types";
 import { highlightText } from "../../../shared/utils/highlight";
+import { useModal } from "../../../shared/modal/ModalContext";
+import UserModal from "../../user/ui/UserModal";
+import { PostTableData } from "../model/types";
+import PostDetailModal from "./PostDetailModal";
+import CommentList from "../../comment/ui/CommentList";
+import { usePostsUrlQuery } from "../../../pages/posts-manager/providers/PostsUrlQueryContext";
+import PostEditModal from "./PostEditModal";
+import { usePostDeleteMutate } from "../../../entities/post/hooks/use-post-delete-mutate";
 interface PostTableProps {
-  posts: PostModel[];
+  posts: PostTableData[];
   searchQuery: string;
   selectedTag: string;
-  onClickTagAction: (tag: string) => void;
-  onClickAuthorAction: (user: UserModel) => void;
-  onClickDetailAction: (post: PostModel) => void;
-  onClickEditAction: (post: PostModel) => void;
-  onClickDeleteAction: (post: PostModel) => void;
 }
 
-export default function PostTable({
-  posts,
-  searchQuery,
-  selectedTag,
-  onClickTagAction,
-  onClickAuthorAction,
-  onClickDetailAction,
-  onClickEditAction,
-  onClickDeleteAction,
-}: PostTableProps) {
+export default function PostTable({ posts, searchQuery, selectedTag }: PostTableProps) {
+  const { queryParams, setQueryParams } = usePostsUrlQuery();
+  const { openModal } = useModal();
+  const { mutateAsync: deletePostMutation } = usePostDeleteMutate();
+
+  const openPostDetail = (post: PostModel) => {
+    openModal((close) => (
+      <PostDetailModal
+        onClose={close}
+        post={post}
+        searchQuery={queryParams.search || ""}
+        comment={<CommentList postId={post.id} searchQuery={queryParams.search || ""} />}
+      />
+    ));
+  };
   return (
     <Table>
       <TableHeader>
@@ -52,7 +59,7 @@ export default function PostTable({
                           ? "text-white bg-blue-500 hover:bg-blue-600"
                           : "text-blue-800 bg-blue-100 hover:bg-blue-200"
                       }`}
-                      onClick={() => onClickTagAction(tag)}
+                      onClick={() => setQueryParams({ tag })}
                     >
                       {tag}
                     </span>
@@ -63,7 +70,7 @@ export default function PostTable({
             <TableCell>
               <div
                 className="flex items-center space-x-2 cursor-pointer"
-                onClick={() => onClickAuthorAction(post.author)}
+                onClick={() => openModal((close) => <UserModal userId={post.author?.id} onClose={close} />)}
               >
                 <img src={post.author?.image} alt={post.author?.username} className="w-8 h-8 rounded-full" />
                 <span>{post.author?.username}</span>
@@ -79,13 +86,17 @@ export default function PostTable({
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <Button variant="ghost" size="sm" onClick={() => onClickDetailAction(post)}>
+                <Button variant="ghost" size="sm" onClick={() => openPostDetail(post)}>
                   <MessageSquare className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onClickEditAction(post)}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => openModal((close) => <PostEditModal onClose={close} selectedPost={post} />)}
+                >
                   <Edit2 className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onClickDeleteAction(post)}>
+                <Button variant="ghost" size="sm" onClick={() => deletePostMutation({ postId: post.id })}>
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
