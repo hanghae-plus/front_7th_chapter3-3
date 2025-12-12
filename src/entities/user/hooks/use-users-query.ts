@@ -1,4 +1,4 @@
-import { userKeys } from "../api/userKeys";
+import { userKeys } from "../api/user-keys";
 import { getUsersApi } from "../api/user-api";
 import { useQuery } from "@tanstack/react-query";
 import { UserGetQueryParams } from "../api/dto";

@@ -2,7 +2,7 @@
 export type { UserModel } from "./model/types";
 
 // API
-export { userKeys } from "./api/userKeys";
+export { userKeys } from "./api/user-keys";
 export type { UserGetQueryParams, UserListApiResponse } from "./api/dto";
 
 // Hooks - Queries

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { userKeys } from "../api/userKeys";
+import { userKeys } from "../api/user-keys";
 import { getUserApi } from "../api/user-api";
 import { STALE_TIME } from "../../../shared/config/query-config";
 
