@@ -1,0 +1,11 @@
+// Comment entity exports
+export type { Comment, CommentUser } from "./model/comment.interface"
+export type {
+  CommentDto,
+  CreateCommentRequestDto,
+  UpdateCommentRequestDto,
+  CommentListResponseDto,
+} from "./api/comment.dto"
+export { commentMapper } from "./api/comment.mapper"
+export { commentService } from "./api/comment.service"
+export { commentQueries, commentKeys } from "./api/comment.queries"
