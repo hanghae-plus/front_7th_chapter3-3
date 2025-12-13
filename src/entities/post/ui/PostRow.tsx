@@ -1,7 +1,7 @@
 import { memo } from "react"
 import { Edit2, MessageSquare, ThumbsDown, ThumbsUp, Trash2 } from "lucide-react"
 import { Post } from "../types"
-import { Button } from "@/components"
+import { Button } from "@/shared/ui/buttons"
 import { TableCell, TableRow } from "@/shared/ui/tables"
 import { TagBadge } from "@/entities/tag/ui/TagBadge"
 import { UserAvatar } from "@/entities/user/ui/UserAvatar"

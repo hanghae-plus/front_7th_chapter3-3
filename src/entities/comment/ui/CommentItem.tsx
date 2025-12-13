@@ -1,7 +1,7 @@
 import { memo } from "react"
 import { Edit2, ThumbsUp, Trash2 } from "lucide-react"
 import { Comment } from "../types"
-import { Button } from "@/components"
+import { Button } from "@/shared/ui/buttons"
 import { highlightText } from "@/shared/lib"
 
 interface CommentItemProps {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { Plus } from "lucide-react"
-import { Button } from "@/components"
+import { Button } from "@/shared/ui/buttons"
 import { useCommentStore, CommentItem } from "@/entities/comment"
 import { useUiStore } from "@/shared/model"
 

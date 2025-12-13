@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { Button, Dialog, Input, Textarea } from "@/components"
-import { DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
+import { Button } from "@/shared/ui/buttons"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
+import { Input, Textarea } from "@/shared/ui/inputs"
 import { usePostStore } from "@/entities/post"
 import { useUiStore } from "@/shared/model"
 

@@ -1,4 +1,5 @@
-import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components"
+import { Button } from "@/shared/ui/buttons"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/selects"
 
 interface PaginationProps {
   skip: number

@@ -1,5 +1,5 @@
 import { Search } from "lucide-react"
-import { Input } from "@/components"
+import { Input } from "@/shared/ui/inputs"
 import { useUiStore } from "@/shared/model"
 
 export const SearchInput = () => {

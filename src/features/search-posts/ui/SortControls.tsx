@@ -1,4 +1,4 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/selects"
 import { useUiStore } from "@/shared/model"
 
 export const SortControls = () => {

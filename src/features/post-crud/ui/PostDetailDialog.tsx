@@ -1,5 +1,4 @@
-import { Dialog } from "@/components"
-import { DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
 import { usePostStore } from "@/entities/post"
 import { useUiStore } from "@/shared/model"
 import { highlightText } from "@/shared/lib"

@@ -1,5 +1,6 @@
-import { Button, Dialog, Textarea } from "@/components"
-import { DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
+import { Button } from "@/shared/ui/buttons"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialogs"
+import { Textarea } from "@/shared/ui/inputs"
 import { useCommentStore } from "@/entities/comment"
 import { useUiStore } from "@/shared/model"
 

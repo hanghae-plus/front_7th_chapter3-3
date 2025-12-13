@@ -1,5 +1,5 @@
 import { useEffect } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/selects"
 import { useTagStore } from "@/entities/tag"
 import { useUiStore } from "@/shared/model"
 

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Plus } from "lucide-react"
-import { Button } from "@/components"
+import { Button } from "@/shared/ui/buttons"
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/shared/ui/tables"
 import { Post, usePostStore, PostRow } from "@/entities/post"
 import { useTagStore } from "@/entities/tag"
