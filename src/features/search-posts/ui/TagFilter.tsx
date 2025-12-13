@@ -1,13 +1,11 @@
 import { useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components"
 import { useTagStore } from "@/entities/tag"
-import { usePostStore } from "@/entities/post"
 import { useUiStore } from "@/shared/model"
 
 export const TagFilter = () => {
   const { tags, selectedTag, setSelectedTag, fetchTags } = useTagStore()
-  const { fetchPostsByTag, fetchPosts } = usePostStore()
-  const { limit, skip } = useUiStore()
+  const { setSkip } = useUiStore()
 
   useEffect(() => {
     fetchTags()
@@ -15,11 +13,7 @@ export const TagFilter = () => {
 
   const handleChange = (value: string) => {
     setSelectedTag(value)
-    if (value && value !== "all") {
-      fetchPostsByTag(value)
-    } else {
-      fetchPosts(limit, skip)
-    }
+    setSkip(0)
   }
 
   return (

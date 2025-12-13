@@ -9,7 +9,7 @@ interface PostState {
   loading: boolean
 
   // Actions
-  fetchPosts: (limit: number, skip: number) => Promise<void>
+  fetchPosts: (limit: number, skip: number, sortBy?: string, sortOrder?: string) => Promise<void>
   searchPosts: (query: string) => Promise<void>
   fetchPostsByTag: (tag: string) => Promise<void>
   addPost: (post: NewPost) => Promise<void>
@@ -24,10 +24,10 @@ export const usePostStore = create<PostState>((set, get) => ({
   selectedPost: null,
   loading: false,
 
-  fetchPosts: async (limit, skip) => {
+  fetchPosts: async (limit, skip, sortBy?, sortOrder?) => {
     set({ loading: true })
     try {
-      const { posts, total } = await postApi.getPosts(limit, skip)
+      const { posts, total } = await postApi.getPosts(limit, skip, sortBy, sortOrder)
       set({ posts, total })
     } catch (error) {
       console.error("게시물 가져오기 오류:", error)

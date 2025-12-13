@@ -7,9 +7,19 @@ interface UsersResponse {
 }
 
 export const postApi = {
-  async getPosts(limit: number, skip: number): Promise<{ posts: Post[]; total: number }> {
+  async getPosts(
+    limit: number,
+    skip: number,
+    sortBy?: string,
+    sortOrder?: string
+  ): Promise<{ posts: Post[]; total: number }> {
+    const params: Record<string, string | number> = { limit, skip }
+    if (sortBy) {
+      params.sortBy = sortBy
+      params.order = sortOrder || "asc"
+    }
     const [postsData, usersData] = await Promise.all([
-      apiClient<PostsResponse>("/posts", { params: { limit, skip } }),
+      apiClient<PostsResponse>("/posts", { params }),
       apiClient<UsersResponse>("/users", { params: { limit: 0, select: "username,image" } }),
     ])
 

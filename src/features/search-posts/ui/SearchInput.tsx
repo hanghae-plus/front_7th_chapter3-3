@@ -1,19 +1,12 @@
 import { Search } from "lucide-react"
 import { Input } from "@/components"
 import { useUiStore } from "@/shared/model"
-import { usePostStore } from "@/entities/post"
 
 export const SearchInput = () => {
-  const { searchQuery, setSearchQuery } = useUiStore()
-  const { searchPosts, fetchPosts } = usePostStore()
-  const { limit, skip } = useUiStore()
+  const { searchQuery, setSearchQuery, setSkip } = useUiStore()
 
   const handleSearch = () => {
-    if (searchQuery) {
-      searchPosts(searchQuery)
-    } else {
-      fetchPosts(limit, skip)
-    }
+    setSkip(0)
   }
 
   return (
@@ -25,7 +18,7 @@ export const SearchInput = () => {
           className="pl-8"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+          onKeyDown={(e) => e.key === "Enter" && handleSearch()}
         />
       </div>
     </div>
