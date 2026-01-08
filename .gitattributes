@@ -1,0 +1,35 @@
+# Line ending 설정
+# 모든 텍스트 파일에 대해 자동으로 line ending 처리
+* text=auto
+
+# 명시적으로 LF를 사용할 파일들
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.txt text eol=lf
+
+# 바이너리 파일 (line ending 변환 안 함)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+
+# 설정 파일
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+

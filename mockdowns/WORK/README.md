@@ -1,0 +1,112 @@
+# 작업 필수 문서 (Essential Work Documents)
+
+## 📋 개요
+
+이 폴더는 **Agent가 실제 작업을 수행할 때 반드시 필요한 문서들**입니다.
+작업 시작 시 이 폴더의 문서들을 우선적으로 읽으세요.
+
+---
+
+## 🚀 빠른 시작 (3분)
+
+### 1. 필수 파일 읽기 (1분)
+
+```bash
+# 현재 작업 상태 확인
+cat mockdowns/WORK/current-step.md    # 현재 Step
+cat mockdowns/WORK/next-step.md       # 다음 작업
+cat mockdowns/WORK/progress.md         # 전체 진행 상태
+```
+
+### 2. 핵심 원칙 읽기 (1분)
+
+```bash
+# 핵심 원칙 (필수!)
+cat mockdowns/WORK/core-principles.md
+```
+
+### 3. Git 상태 확인 (30초)
+
+```bash
+git status
+```
+
+### 4. 작업 시작
+
+`next-step.md`의 지침에 따라 작업 시작!
+
+---
+
+## 📁 파일 구조
+
+```
+WORK/
+├── README.md              # 이 파일 (시작 가이드)
+├── current-step.md        # 현재 진행 중인 Step ⭐
+├── next-step.md           # 다음에 수행할 Step ⭐
+├── progress.md            # 전체 진행 상태 ⭐
+├── core-principles.md     # 핵심 원칙 (필수!) ⭐⭐⭐
+├── phase-1.md             # Phase 1 진행 상태
+├── phase-2.md             # Phase 2 진행 상태
+├── phase-3.md             # Phase 3 진행 상태
+├── phase-4.md             # Phase 4 진행 상태
+├── phase-5.md             # Phase 5 진행 상태
+├── phase-6.md             # Phase 6 진행 상태
+└── phase-7.md             # Phase 7 진행 상태
+```
+
+---
+
+## ⭐ 필수 읽기 순서
+
+1. **`current-step.md`** - 현재 Step 확인
+2. **`next-step.md`** - 다음 작업 확인
+3. **`core-principles.md`** - 핵심 원칙 (최우선!)
+4. **`progress.md`** - 전체 진행 상태
+
+**나머지는 필요 시 참고**
+
+---
+
+## 📚 참고 문서 위치
+
+작업 중 참고가 필요한 문서들은 다음 위치에 있습니다:
+
+- **규칙 및 가이드**: `mockdowns/RULES/`
+- **Import 경로 규칙** (Import 관련 작업 시 필수): `mockdowns/RULES/import-path-rules.md`
+- **전체 워크플로우**: `mockdowns/PLANS/workflow.md`
+- **상세 계획**: `mockdowns/PLANS/`
+
+### ⚠️ Import 관련 작업 시 필수
+
+Import 경로 관련 작업을 할 때는 반드시 `mockdowns/RULES/import-path-rules.md`를 먼저 읽으세요.
+이 문서를 무시하면 Vite 모듈 해석 실패 에러가 발생할 수 있습니다.
+
+---
+
+## 🤖 Cursor Auto Agent 사용
+
+**Cursor Auto에서 작업할 때는 `@agents/` 폴더의 Agent를 사용하세요!**
+
+### Agent 실행 순서
+
+1. **작업 시작**: `@agents/agent-start.md`
+2. **Phase별 작업**: `@agents/agent-phase-{N}.md` (1-7)
+3. **검증**: `@agents/agent-verify.md` (각 Phase 완료 후)
+
+**참고**: `agents/README.md` - Agent 사용 가이드
+
+---
+
+## ✅ 작업 완료 후
+
+작업 완료 후 다음 파일들을 업데이트하세요:
+
+1. `current-step.md` - 완료 체크
+2. `next-step.md` - 다음 Step 명시
+3. 해당 `phase-{N}.md` - 진행률 업데이트
+4. `progress.md` - 전체 진행률 업데이트
+
+---
+
+**이 폴더의 문서만 읽으면 작업을 시작할 수 있습니다! 🚀**

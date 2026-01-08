@@ -1,0 +1,110 @@
+# Phase 2: 상태 관리 (State Management)
+
+## 📋 Phase 정보
+
+**목표**: Zustand Store 생성 및 상태 분리
+**상태**: 완료 ✅
+**시작일**: 2025-01-XX
+**완료일**: 2025-01-XX
+**진행률**: 100%
+
+---
+
+## 🎯 Phase 목표
+
+1. Zustand Store 생성
+2. 상태 분리 및 관리
+3. Props Drilling 최소화
+
+---
+
+## 📋 Step별 진행 상태
+
+### Step 2.1: Post Store 생성
+
+- **상태**: 완료 ✅
+- **진행률**: 100%
+- **시작일**: 2025-01-XX
+- **완료일**: 2025-01-XX
+
+**작업 내용:**
+- [x] Post Store 기본 구조 ✅
+- [x] Post Store 필터링/검색 상태 ✅
+- [x] Post Store 액션 구현 ✅
+
+**참고 문서:**
+- `mockdowns/PLANS/state-management-plan.md`
+- `mockdowns/RULES/coding-rules.md`
+
+---
+
+### Step 2.2: Comment Store 생성
+
+- **상태**: 완료 ✅
+- **진행률**: 100%
+- **시작일**: 2025-01-XX
+- **완료일**: 2025-01-XX
+
+**작업 내용:**
+- [x] Comment Store 생성 ✅
+- [x] 댓글 상태 및 액션 구현 ✅
+
+**참고 문서:**
+- `mockdowns/PLANS/state-management-plan.md`
+
+---
+
+### Step 2.3: User Store 생성
+
+- **상태**: 완료 ✅
+- **진행률**: 100%
+- **시작일**: 2025-01-XX
+- **완료일**: 2025-01-XX
+
+**작업 내용:**
+- [x] User Store 생성 ✅
+- [x] 사용자 상태 및 액션 구현 ✅
+
+**참고 문서:**
+- `mockdowns/PLANS/state-management-plan.md`
+
+---
+
+### Step 2.4: UI Store 생성
+
+- **상태**: 완료 ✅
+- **진행률**: 100%
+- **시작일**: 2025-01-XX
+- **완료일**: 2025-01-XX
+
+**작업 내용:**
+- [x] UI Store 생성 ✅
+- [x] 다이얼로그 상태 관리 ✅
+
+**참고 문서:**
+- `mockdowns/PLANS/state-management-plan.md`
+
+---
+
+## ✅ Phase 완료 체크리스트
+
+- [x] Step 2.1 완료 ✅
+- [x] Step 2.2 완료 ✅
+- [x] Step 2.3 완료 ✅
+- [x] Step 2.4 완료 ✅
+- [x] 모든 Store 생성 완료 ✅
+- [x] 타입 체크 통과 (`tsc --noEmit`) ✅
+- [x] 다음 Phase (Phase 3) 준비 완료 ✅
+
+---
+
+## 🔗 관련 문서
+
+- `mockdowns/PLANS/workflow.md` - 전체 워크플로우 (Phase 2)
+- `mockdowns/PLANS/state-management-plan.md` - 상태 관리 계획
+- `mockdowns/RULES/core-principles.md` - 핵심 원칙
+
+---
+
+**마지막 업데이트**: Phase 2 완료 (2025-01-XX)
+
